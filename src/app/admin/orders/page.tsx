@@ -102,8 +102,8 @@ const AdminOrdersPage = () => {
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [paymentNotes, setPaymentNotes] = useState('');
   const [weightKg, setWeightKg] = useState(0);
-  const [companyKiloPrice, setCompanyKiloPrice] = useState(0); // Company cost per kilo
-  const [customerKiloPrice, setCustomerKiloPrice] = useState(0); // Customer price per kilo
+  const [companyKiloPriceUSD, setCompanyKiloPriceUSD] = useState(0); // Company cost per kilo in USD
+  const [customerKiloPrice, setCustomerKiloPrice] = useState(0); // Customer price per kilo in LYD
 
   // Filtering states
   const [searchQuery, setSearchQuery] = useState("");
@@ -174,8 +174,14 @@ const AdminOrdersPage = () => {
     const profit = activeOrders.reduce((sum, order) => {
       const purchaseCostLYD = (order.purchasePriceUSD || 0) * (order.exchangeRate || settings?.exchangeRate || 1);
       const shippingCostLYD = order.shippingCostLYD || 0;
-      const weightCostLYD = order.companyWeightCost || 0;
-      const netProfit = order.sellingPriceLYD - purchaseCostLYD - shippingCostLYD - weightCostLYD;
+      // Company weight cost stored in USD, convert to LYD using order's exchange rate (or current if not set)
+      const weightCostUSD = order.companyWeightCostUSD || 0;
+      const weightCostLYD = weightCostUSD * (order.exchangeRate || settings?.exchangeRate || 1);
+
+      // Legacy support: if companyWeightCost (LYD) exists, add it too (though we deprecated it)
+      const legacyWeightCost = order.companyWeightCost || 0;
+
+      const netProfit = order.sellingPriceLYD - purchaseCostLYD - shippingCostLYD - weightCostLYD - legacyWeightCost;
       return sum + netProfit;
     }, 0);
 
@@ -213,7 +219,7 @@ const AdminOrdersPage = () => {
   const openWeightDialog = (order: Order) => {
     setCurrentOrder(order);
     setWeightKg(0);
-    setCompanyKiloPrice(0);
+    setCompanyKiloPriceUSD(0);
     setCustomerKiloPrice(0);
     setIsWeightDialogOpen(true);
   };
@@ -292,21 +298,21 @@ const AdminOrdersPage = () => {
     if (!currentOrder || weightKg <= 0) return;
 
     try {
-      await addCustomerWeightCostLYD(currentOrder.id, weightKg, companyKiloPrice, customerKiloPrice);
+      await addCustomerWeightCostLYD(currentOrder.id, weightKg, companyKiloPriceUSD, customerKiloPrice);
 
-      const customerTotal = weightKg * customerKiloPrice;
-      const companyTotal = weightKg * companyKiloPrice;
+      const customerTotalLYD = weightKg * customerKiloPrice;
+      const companyTotalUSD = weightKg * companyKiloPriceUSD;
 
       setOrders(prev => prev.map(o => {
         if (o.id === currentOrder.id) {
           return {
             ...o,
-            sellingPriceLYD: o.sellingPriceLYD + customerTotal,
-            remainingAmount: o.remainingAmount + customerTotal,
-            customerWeightCost: (o.customerWeightCost || 0) + customerTotal,
-            companyWeightCost: (o.companyWeightCost || 0) + companyTotal,
+            sellingPriceLYD: o.sellingPriceLYD + customerTotalLYD,
+            remainingAmount: o.remainingAmount + customerTotalLYD,
+            customerWeightCost: (o.customerWeightCost || 0) + customerTotalLYD,
+            companyWeightCostUSD: (o.companyWeightCostUSD || 0) + companyTotalUSD,
             weightKG: weightKg,
-            companyPricePerKilo: companyKiloPrice,
+            companyPricePerKiloUSD: companyKiloPriceUSD,
             customerPricePerKilo: customerKiloPrice
           };
         }
@@ -740,12 +746,12 @@ const AdminOrdersPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="company-price">تكلفة الكيلو على الشركة (د.ل)</Label>
+              <Label htmlFor="company-price">تكلفة الكيلو على الشركة ($ دولار)</Label>
               <Input
                 id="company-price"
                 type="number"
-                value={companyKiloPrice}
-                onChange={(e) => setCompanyKiloPrice(parseFloat(e.target.value) || 0)}
+                value={companyKiloPriceUSD}
+                onChange={(e) => setCompanyKiloPriceUSD(parseFloat(e.target.value) || 0)}
                 dir="ltr"
               />
             </div>
@@ -760,18 +766,36 @@ const AdminOrdersPage = () => {
               />
             </div>
             <div className="bg-muted p-3 rounded-md text-sm space-y-1">
-              <div className="flex justify-between">
-                <span>إجمالي التكلفة (شركة):</span>
-                <span className="font-bold">{(weightKg * companyKiloPrice).toFixed(2)} د.ل</span>
-              </div>
-              <div className="flex justify-between">
-                <span>إجمالي البيع (زبون):</span>
-                <span className="font-bold text-green-600">{(weightKg * customerKiloPrice).toFixed(2)} د.ل</span>
-              </div>
-              <div className="flex justify-between pt-1 border-t">
-                <span>الربح من الوزن:</span>
-                <span className="font-bold text-primary">{((weightKg * customerKiloPrice) - (weightKg * companyKiloPrice)).toFixed(2)} د.ل</span>
-              </div>
+              {(() => {
+                const companyTotalUSD = weightKg * companyKiloPriceUSD;
+                const exchangeRate = currentOrder?.exchangeRate || settings?.exchangeRate || 1;
+                const companyTotalLYD = companyTotalUSD * exchangeRate;
+                const customerTotalLYD = weightKg * customerKiloPrice;
+                const profit = customerTotalLYD - companyTotalLYD;
+
+                return (
+                  <>
+                    <div className="flex justify-between">
+                      <span>التكلفة (شركة - $):</span>
+                      <span className="font-bold">{companyTotalUSD.toFixed(2)} $</span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground text-xs">
+                      <span>(سعر الصرف: {exchangeRate})</span>
+                      <span>~ {companyTotalLYD.toFixed(2)} د.ل</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>إجمالي البيع (زبون):</span>
+                      <span className="font-bold text-green-600">{customerTotalLYD.toFixed(2)} د.ل</span>
+                    </div>
+                    <div className="flex justify-between pt-1 border-t mt-1">
+                      <span>تقدير الربح:</span>
+                      <span className={`font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {profit.toFixed(2)} د.ل
+                      </span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
           <DialogFooter>

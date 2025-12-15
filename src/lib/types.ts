@@ -63,9 +63,11 @@ export interface Order {
   pricePerKiloCurrency?: 'LYD' | 'USD';
   customerWeightCost?: number;
   customerWeightCostCurrency?: 'LYD' | 'USD';
-  companyWeightCost?: number; // Total cost paid by company
-  companyPricePerKilo?: number; // Cost per kilo for company
-  customerPricePerKilo?: number; // Price per kilo for customer
+  companyWeightCost?: number; // Total cost paid by company (kept for backward compatibility or if LYD is strictly needed)
+  companyWeightCostUSD?: number; // Total cost paid by company in USD
+  companyPricePerKilo?: number; // Cost per kilo for company (LYD - deprecated/optional)
+  companyPricePerKiloUSD?: number; // Cost per kilo for company in USD
+  customerPricePerKilo?: number; // Price per kilo for customer (LYD)
   addedCostUSD?: number; // New field for additional costs in USD
   addedCostNotes?: string; // Notes for the added cost
   store?: string;

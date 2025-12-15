@@ -713,7 +713,7 @@ export async function addCustomerShippingCost(orderId: string, costInUSD: number
     }
 }
 
-export async function addCustomerWeightCostLYD(orderId: string, weight: number, companyPricePerKilo: number, customerPricePerKilo: number): Promise<boolean> {
+export async function addCustomerWeightCostLYD(orderId: string, weight: number, companyPricePerKiloUSD: number, customerPricePerKilo: number): Promise<boolean> {
     if (weight <= 0) return false;
     const orderRef = doc(db, ORDERS_COLLECTION, orderId);
 
@@ -729,23 +729,23 @@ export async function addCustomerWeightCostLYD(orderId: string, weight: number, 
             const orderData = orderDoc.data() as Order;
             const currentSellingPrice = orderData.sellingPriceLYD || 0;
             const currentWeightCost = orderData.customerWeightCost || 0;
-            const currentCompanyWeightCost = orderData.companyWeightCost || 0;
+            const currentCompanyWeightCostUSD = orderData.companyWeightCostUSD || 0;
 
-            const customerTotalCost = weight * customerPricePerKilo;
-            const companyTotalCost = weight * companyPricePerKilo;
+            const customerTotalCostLYD = weight * customerPricePerKilo;
+            const companyTotalCostUSD = weight * companyPricePerKiloUSD;
 
-            const newSellingPrice = currentSellingPrice + customerTotalCost;
-            const newCustomerWeightCost = currentWeightCost + customerTotalCost;
-            const newCompanyWeightCost = currentCompanyWeightCost + companyTotalCost;
+            const newSellingPrice = currentSellingPrice + customerTotalCostLYD;
+            const newCustomerWeightCost = currentWeightCost + customerTotalCostLYD;
+            const newCompanyWeightCostUSD = currentCompanyWeightCostUSD + companyTotalCostUSD;
 
             transaction.update(orderRef, {
                 sellingPriceLYD: newSellingPrice,
-                remainingAmount: increment(customerTotalCost),
+                remainingAmount: increment(customerTotalCostLYD),
                 weightKG: weight,
-                companyPricePerKilo: companyPricePerKilo,
+                companyPricePerKiloUSD: companyPricePerKiloUSD,
                 customerPricePerKilo: customerPricePerKilo,
                 customerWeightCost: newCustomerWeightCost,
-                companyWeightCost: newCompanyWeightCost,
+                companyWeightCostUSD: newCompanyWeightCostUSD,
             });
         });
 
