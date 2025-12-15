@@ -706,6 +706,55 @@ export async function addCustomerShippingCost(orderId: string, costInUSD: number
     }
 }
 
+export async function addCustomerWeightCostLYD(orderId: string, costLYD: number): Promise<boolean> {
+    if (costLYD < 0) return false;
+    const orderRef = doc(db, ORDERS_COLLECTION, orderId);
+
+    try {
+        const batch = writeBatch(db); // Use batch for simplicity as we fixed it, or transaction if concurrency is high. 
+        // Let's use runTransaction for consistency with financial updates.
+
+        await runTransaction(db, async (transaction) => {
+            const orderDoc = await transaction.get(orderRef);
+            if (!orderDoc.exists()) {
+                throw new Error("Order document does not exist!");
+            }
+
+            const orderData = orderDoc.data() as Order;
+            const currentSellingPrice = orderData.sellingPriceLYD || 0;
+            const currentWeightCost = orderData.customerWeightCost || 0;
+
+            const newSellingPrice = currentSellingPrice + costLYD;
+            const newWeightCost = currentWeightCost + costLYD;
+
+            transaction.update(orderRef, {
+                sellingPriceLYD: newSellingPrice,
+                remainingAmount: increment(costLYD),
+                customerWeightCost: newWeightCost,
+            });
+
+            // Create a transaction record for this addition (User requested it be added to debts, a transaction record is good for history)
+            // Actually currently we only track 'payment' and 'order'. 
+            // Adding a 'charge' type transaction might be useful but sticking to just updating order is what was requested implicitly.
+            // "add it to user debts" -> handled by remainingAmount update.
+        });
+
+        // Update stats
+        const orderSnap = await getDoc(orderRef);
+        if (orderSnap.exists()) {
+            const userId = orderSnap.data().userId;
+            if (userId) {
+                await recalculateUserStats(userId);
+            }
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error in addCustomerWeightCostLYD:", error);
+        return false;
+    }
+}
+
 export async function assignRepresentativeToOrder(orderId: string, rep: Representative): Promise<boolean> {
     try {
         const batch = writeBatch(db);

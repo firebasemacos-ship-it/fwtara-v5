@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MoreHorizontal, PlusCircle, Trash2, Edit, Truck, CheckCircle, Clock, DollarSign, Copy, UserPlus, Search, Package, Building, Plane, MapPin, UserX, Calendar as CalendarIcon, Filter, X, Printer, TrendingUp } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Trash2, Edit, Truck, CheckCircle, Clock, DollarSign, Copy, UserPlus, Search, Package, Building, Plane, MapPin, UserX, Calendar as CalendarIcon, Filter, X, Printer, TrendingUp, Scale } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,7 +38,7 @@ import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from "@/components/ui/use-toast";
 import { Order, OrderStatus, Representative, AppSettings } from '@/lib/types';
-import { getOrders, updateOrder, deleteOrder, addTransaction, getRepresentatives, assignRepresentativeToOrder, unassignRepresentativeFromOrder, bulkDeleteOrders, bulkUpdateOrdersStatus, getAppSettings } from '@/lib/actions';
+import { getOrders, updateOrder, deleteOrder, addTransaction, getRepresentatives, assignRepresentativeToOrder, unassignRepresentativeFromOrder, bulkDeleteOrders, bulkUpdateOrdersStatus, getAppSettings, addCustomerWeightCostLYD } from '@/lib/actions';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -95,11 +95,13 @@ const AdminOrdersPage = () => {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+  const [isWeightDialogOpen, setIsWeightDialogOpen] = useState(false);
 
   // Data for dialogs
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [paymentNotes, setPaymentNotes] = useState('');
+  const [weightCost, setWeightCost] = useState(0);
 
   // Filtering states
   const [searchQuery, setSearchQuery] = useState("");
@@ -205,6 +207,12 @@ const AdminOrdersPage = () => {
     setIsDeleteConfirmOpen(true);
   };
 
+  const openWeightDialog = (order: Order) => {
+    setCurrentOrder(order);
+    setWeightCost(0);
+    setIsWeightDialogOpen(true);
+  };
+
   const handleUpdateStatus = async (orderId: string, status: OrderStatus) => {
     try {
       await updateOrder(orderId, { status });
@@ -269,6 +277,30 @@ const AdminOrdersPage = () => {
 
   const handlePrint = (order: Order) => {
     window.open(`/admin/orders/${order.id}/print`, '_blank', 'height=842,width=595,resizable=yes,scrollbars=yes');
+  };
+
+  const handleAddWeightCost = async () => {
+    if (!currentOrder || weightCost <= 0) return;
+
+    try {
+      await addCustomerWeightCostLYD(currentOrder.id, weightCost);
+      setOrders(prev => prev.map(o => {
+        if (o.id === currentOrder.id) {
+          return {
+            ...o,
+            sellingPriceLYD: o.sellingPriceLYD + weightCost,
+            remainingAmount: o.remainingAmount + weightCost,
+            customerWeightCost: (o.customerWeightCost || 0) + weightCost
+          };
+        }
+        return o;
+      }));
+      toast({ title: "تم إضافة قيمة الوزن بنجاح" });
+      setIsWeightDialogOpen(false);
+      setCurrentOrder(null);
+    } catch (error) {
+      toast({ title: "خطأ", description: "فشل إضافة القيمة", variant: "destructive" });
+    }
   };
 
   // --- Bulk Action Handlers ---
@@ -585,6 +617,10 @@ const AdminOrdersPage = () => {
                             <DropdownMenuItem onSelect={() => openDeleteConfirm(order)} className="text-destructive focus:bg-destructive/30 focus:text-destructive-foreground">
                               <Trash2 className="ml-2 h-4 w-4" /> حذف
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onSelect={() => openWeightDialog(order)}>
+                              <Scale className="ml-2 h-4 w-4" /> وزن الزبون
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -662,6 +698,34 @@ const AdminOrdersPage = () => {
           <DialogFooter>
             <Button variant="destructive" onClick={handleBulkDelete}>نعم، قم بحذف الكل</Button>
             <Button variant="outline" onClick={() => setIsBulkDeleteOpen(false)}>إلغاء</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Weight Cost Dialog */}
+      <Dialog open={isWeightDialogOpen} onOpenChange={setIsWeightDialogOpen}>
+        <DialogContent dir='rtl'>
+          <DialogHeader>
+            <DialogTitle>إضافة قيمة وزن الزبون - {currentOrder?.invoiceNumber}</DialogTitle>
+            <DialogDescription>
+              أدخل القيمة المالية للوزن (د.ل) لإضافتها على الفاتورة والمديونية.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="weight-cost">قيمة الوزن (د.ل)</Label>
+              <Input
+                id="weight-cost"
+                type="number"
+                value={weightCost}
+                onChange={(e) => setWeightCost(parseFloat(e.target.value) || 0)}
+                dir="ltr"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleAddWeightCost}>إضافة</Button>
+            <Button variant="outline" onClick={() => setIsWeightDialogOpen(false)}>إلغاء</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
