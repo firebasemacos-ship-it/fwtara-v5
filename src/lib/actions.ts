@@ -573,10 +573,87 @@ export async function addOrder(orderData: Omit<Order, 'id' | 'invoiceNumber'>): 
             }
 
             const settings = await getAppSettings();
-
             const userData = userDoc.data();
-            const newOrderCount = (userData.orderCounter || 0) + 1;
-            const invoiceNumber = `${userData.username}-${String(newOrderCount).padStart(2, '0')}`;
+
+            // --- NEW LOGIC: DYNAMIC SEQUENCE CALCULATION ---
+            // 1. Fetch all existing orders for this user to find the max invoice number
+            // Note: In a transaction, we can't easily do a query. 
+            // Ideally, we trust `orderCounter`, but the user says it's out of sync.
+            // Since we can't do a query inside a transaction on a different collection easily without reading potentially thousands of docs which is costly,
+            // we will try to rely on a "best effort" check OR we must do the query *before* the transaction (but that has race condition risks, though low for a single user).
+            // BETTER APPROACH given `dbAdapter`: We can do a query before. Races are unlikely for a single user adding orders sequentially.
+            // However, to be safe and robust as per request:
+
+            // Let's do the query BEFORE the transaction to get the "current max known".
+            // Then inside transaction we can double check or just use it. 
+            // Since we're inside `runTransaction` callback here, we can't await a query easily if the adapter doesn't support it inside tx.
+            // `dbAdapter` seems to be a wrapper around Firestore or similar.
+            // Let's assume we can query outside.
+            // BUT, `runTransaction` expects a synchronous-looking async function.
+
+            // Let's refactor: Get the max order number first, outside the transaction.
+            throw new Error("REFACTOR_NEEDED_MOVED_LOGIC_OUTSIDE");
+        });
+        return null; // Should not reach here due to error throw
+    } catch (error) {
+        if (error.message === "REFACTOR_NEEDED_MOVED_LOGIC_OUTSIDE") {
+            // Continue below
+        } else {
+            console.error("Error adding order:", error);
+            return null;
+        }
+    }
+
+    // --- REFACTORED LOGIC ---
+    try {
+        // 1. Find the highest existing sequence number
+        const userOrdersQuery = query(
+            collection(db, ORDERS_COLLECTION),
+            where("userId", "==", orderData.userId)
+        );
+        const userOrdersSnapshot = await getDocs(userOrdersQuery);
+
+        let maxSequence = 0;
+        const userDocRef = doc(db, USERS_COLLECTION, orderData.userId);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.exists() ? userDocSnap.data() : {};
+        const username = userData.username || 'USER';
+
+        // Check based on stored counter first
+        if (userData.orderCounter) {
+            maxSequence = userData.orderCounter;
+        }
+
+        // Check actual orders
+        userOrdersSnapshot.forEach(doc => {
+            const order = doc.data() as Order;
+            if (order.invoiceNumber && order.invoiceNumber.startsWith(username + '-')) {
+                const parts = order.invoiceNumber.split('-');
+                if (parts.length >= 2) {
+                    const seq = parseInt(parts[parts.length - 1], 10);
+                    if (!isNaN(seq) && seq > maxSequence) {
+                        maxSequence = seq;
+                    }
+                }
+            }
+        });
+
+        // 2. Perform Transaction to create the new order
+        return await runTransaction(db, async (transaction) => {
+            const userRef = doc(db, USERS_COLLECTION, orderData.userId);
+            const userDoc = await transaction.get(userRef); // Get fresh user data
+
+            if (!userDoc.exists()) {
+                throw new Error(`User with ID ${orderData.userId} does not exist!`);
+            }
+
+            const settings = await getAppSettings();
+
+            // Recalculate next sequence (maxSequence from outside could be stale if high concurrency, but unlikely for single user action)
+            // We use (maxSequence + 1) as the candidate.
+            const newOrderCount = maxSequence + 1;
+
+            const invoiceNumber = `${username}-${String(newOrderCount).padStart(2, '0')}`;
             const finalTrackingId = orderData.trackingId || Math.random().toString(36).substring(2, 10).toUpperCase();
 
             // Correctly calculate remainingAmount at creation
@@ -587,7 +664,7 @@ export async function addOrder(orderData: Omit<Order, 'id' | 'invoiceNumber'>): 
                 invoiceNumber: invoiceNumber,
                 trackingId: finalTrackingId,
                 exchangeRate: settings.exchangeRate,
-                remainingAmount: remainingAmount, // Use the correctly calculated amount
+                remainingAmount: remainingAmount,
             };
 
             const orderRef = doc(collection(db, ORDERS_COLLECTION));
@@ -621,6 +698,7 @@ export async function addOrder(orderData: Omit<Order, 'id' | 'invoiceNumber'>): 
                 });
             }
 
+            // Update the user's counter to the new max
             await transaction.update(userRef, {
                 orderCounter: newOrderCount
             });
@@ -628,12 +706,13 @@ export async function addOrder(orderData: Omit<Order, 'id' | 'invoiceNumber'>): 
             return orderRef;
         });
 
-        // After the transaction completes, update stats and return the created order
-        const newOrderSnap = await getDoc(newDocRef);
-        if (newOrderSnap.exists()) {
-            const newOrderData = { id: newOrderSnap.id, ...newOrderSnap.data() } as Order;
-            await recalculateUserStats(newOrderData.userId);
-            return newOrderData;
+        if (newDocRef) {
+            const newOrderSnap = await getDoc(newDocRef);
+            if (newOrderSnap.exists()) {
+                const newOrderData = { id: newOrderSnap.id, ...newOrderSnap.data() } as Order;
+                await recalculateUserStats(newOrderData.userId);
+                return newOrderData;
+            }
         }
         return null;
 
@@ -1002,10 +1081,16 @@ export async function getTempOrders(): Promise<TempOrder[]> {
         const querySnapshot = await getDocs(query(collection(db, TEMP_ORDERS_COLLECTION), where("status", "!=", "cancelled")));
         return querySnapshot.docs.map(doc => {
             const data = doc.data();
+            const subOrders = Array.isArray(data.subOrders) ? data.subOrders.map((so: any) => ({
+                ...so,
+                customerName: so.customerName || so.name || so.clientName || so.receiverName || 'عميل غير معروف',
+                customerPhone: so.customerPhone || so.phone || so.phoneNumber || ''
+            })) : [];
+
             return {
                 id: doc.id,
                 ...data,
-                subOrders: Array.isArray(data.subOrders) ? data.subOrders : []
+                subOrders
             } as TempOrder;
         })
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -1021,10 +1106,16 @@ export async function getTempOrderById(orderId: string): Promise<TempOrder | nul
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             const data = docSnap.data();
+            const subOrders = Array.isArray(data.subOrders) ? data.subOrders.map((so: any) => ({
+                ...so,
+                customerName: so.customerName || so.name || so.clientName || so.receiverName || 'عميل غير معروف',
+                customerPhone: so.customerPhone || so.phone || so.phoneNumber || ''
+            })) : [];
+
             return {
                 id: docSnap.id,
                 ...data,
-                subOrders: Array.isArray(data.subOrders) ? data.subOrders : []
+                subOrders
             } as TempOrder;
         }
         return null;
@@ -1047,6 +1138,8 @@ export async function getTempSubOrdersByRepresentativeId(repId: string): Promise
                 if (subOrder.representativeId === repId) {
                     assignedSubOrders.push({
                         ...subOrder,
+                        customerName: subOrder.customerName || subOrder.name || subOrder.clientName || subOrder.receiverName || 'عميل غير معروف',
+                        customerPhone: subOrder.customerPhone || subOrder.phone || subOrder.phoneNumber || '',
                         invoiceName: tempOrder.invoiceName
                     });
                 }
