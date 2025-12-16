@@ -93,9 +93,9 @@ const AdminUsersPage = () => {
     return users.filter(user => {
       const query = searchQuery.toLowerCase();
       return (
-        user.name.toLowerCase().includes(query) ||
-        user.username.toLowerCase() === query ||
-        user.phone.includes(query)
+        (user.name || '').toLowerCase().includes(query) ||
+        (user.username || '').toLowerCase().includes(query) ||
+        (user.phone || '').includes(query)
       );
     });
   }, [users, searchQuery]);
