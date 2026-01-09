@@ -792,8 +792,9 @@ export async function addCustomerShippingCost(orderId: string, costInUSD: number
     }
 }
 
-export async function setCustomerWeightDetails(orderId: string, weight: number, companyPricePerKiloUSD: number, customerPricePerKilo: number): Promise<boolean> {
-    if (weight < 0) return false; // Allow 0 to potentially clear it? Let's assume non-negative.
+
+export async function addCustomerWeight(orderId: string, additionalWeight: number, companyPricePerKiloUSD: number, customerPricePerKilo: number): Promise<boolean> {
+    if (additionalWeight <= 0) return false;
     const orderRef = doc(db, ORDERS_COLLECTION, orderId);
 
     try {
@@ -808,41 +809,42 @@ export async function setCustomerWeightDetails(orderId: string, weight: number, 
             const currentRemaining = orderData.remainingAmount || 0;
 
             // Previous values
-            const oldCustomerWeightCost = orderData.customerWeightCost || 0;
-            // No need to check old company cost for the delta of debt/selling price, only customer cost affects user wallet.
+            const currentWeight = orderData.weightKG || 0;
+            const currentCustomerWeightCost = orderData.customerWeightCost || 0;
+            const currentCompanyWeightCostUSD = orderData.companyWeightCostUSD || 0;
 
-            // New values
-            const newCustomerTotalCostLYD = weight * customerPricePerKilo;
-            const newCompanyTotalCostUSD = weight * companyPricePerKiloUSD;
+            // Calculate additives
+            const addedCustomerCostLYD = additionalWeight * customerPricePerKilo;
+            const addedCompanyCostUSD = additionalWeight * companyPricePerKiloUSD;
 
-            // Delta
-            const costDifference = newCustomerTotalCostLYD - oldCustomerWeightCost;
+            // New Totals
+            const newWeight = currentWeight + additionalWeight;
+            const newCustomerWeightCost = currentCustomerWeightCost + addedCustomerCostLYD;
+            const newCompanyWeightCostUSD = currentCompanyWeightCostUSD + addedCompanyCostUSD;
 
             await transaction.update(orderRef, {
-                sellingPriceLYD: currentSellingPrice + costDifference,
-                remainingAmount: currentRemaining + costDifference,
-                weightKG: weight,
-                companyPricePerKiloUSD: companyPricePerKiloUSD,
-                customerPricePerKilo: customerPricePerKilo,
-                customerWeightCost: newCustomerTotalCostLYD,
-                companyWeightCostUSD: newCompanyTotalCostUSD,
+                sellingPriceLYD: currentSellingPrice + addedCustomerCostLYD,
+                remainingAmount: currentRemaining + addedCustomerCostLYD,
+                weightKG: newWeight,
+                companyPricePerKiloUSD: companyPricePerKiloUSD, // Update to latest used
+                customerPricePerKilo: customerPricePerKilo,   // Update to latest used
+                customerWeightCost: newCustomerWeightCost,
+                companyWeightCostUSD: newCompanyWeightCostUSD,
             });
 
-            // Log Transaction if there is a difference
-            if (costDifference !== 0) {
-                const transactionRef = doc(collection(db, TRANSACTIONS_COLLECTION));
-                const newTransaction = {
-                    orderId: orderId,
-                    customerId: orderData.userId,
-                    customerName: orderData.customerName,
-                    date: new Date().toISOString(),
-                    type: 'order', // Using 'order' type as it affects the order value/debt
-                    status: 'completed',
-                    amount: costDifference, // Can be negative for reductions
-                    description: `تعديل وزن الزبون: ${weight} كجم (السابق: ${(oldCustomerWeightCost / (customerPricePerKilo || 1)).toFixed(2)} كجم)`
-                };
-                await transaction.set(transactionRef, newTransaction);
-            }
+            // Log Transaction using the ADDED amount
+            const transactionRef = doc(collection(db, TRANSACTIONS_COLLECTION));
+            const newTransaction = {
+                orderId: orderId,
+                customerId: orderData.userId,
+                customerName: orderData.customerName,
+                date: new Date().toISOString(),
+                type: 'order',
+                status: 'completed',
+                amount: addedCustomerCostLYD,
+                description: `إضافة وزن للزبون: ${additionalWeight} كجم (السعر: ${customerPricePerKilo} د.ل/كجم) (الإجمالي الجديد: ${newWeight} كجم)`
+            };
+            await transaction.set(transactionRef, newTransaction);
         });
 
         const orderSnap = await getDoc(orderRef);
@@ -855,10 +857,11 @@ export async function setCustomerWeightDetails(orderId: string, weight: number, 
 
         return true;
     } catch (error) {
-        console.error("Error in setCustomerWeightDetails:", error);
+        console.error("Error in addCustomerWeight:", error);
         return false;
     }
 }
+
 
 export async function assignRepresentativeToOrder(orderId: string, rep: Representative): Promise<boolean> {
     try {

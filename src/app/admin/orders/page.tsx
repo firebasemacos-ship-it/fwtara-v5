@@ -38,7 +38,7 @@ import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from "@/components/ui/use-toast";
 import { Order, OrderStatus, Representative, AppSettings } from '@/lib/types';
-import { getOrders, updateOrder, deleteOrder, addTransaction, getRepresentatives, assignRepresentativeToOrder, unassignRepresentativeFromOrder, bulkDeleteOrders, bulkUpdateOrdersStatus, getAppSettings, setCustomerWeightDetails } from '@/lib/actions';
+import { getOrders, updateOrder, deleteOrder, addTransaction, getRepresentatives, assignRepresentativeToOrder, unassignRepresentativeFromOrder, bulkDeleteOrders, bulkUpdateOrdersStatus, getAppSettings, addCustomerWeight } from '@/lib/actions';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -298,7 +298,7 @@ const AdminOrdersPage = () => {
     if (!currentOrder || weightKg <= 0) return;
 
     try {
-      await setCustomerWeightDetails(currentOrder.id, weightKg, companyKiloPriceUSD, customerKiloPrice);
+      await addCustomerWeight(currentOrder.id, weightKg, companyKiloPriceUSD, customerKiloPrice);
 
       const customerTotalLYD = weightKg * customerKiloPrice;
       const companyTotalUSD = weightKg * companyKiloPriceUSD;
@@ -311,14 +311,14 @@ const AdminOrdersPage = () => {
             remainingAmount: o.remainingAmount + customerTotalLYD,
             customerWeightCost: (o.customerWeightCost || 0) + customerTotalLYD,
             companyWeightCostUSD: (o.companyWeightCostUSD || 0) + companyTotalUSD,
-            weightKG: weightKg,
+            weightKG: (o.weightKG || 0) + weightKg,
             companyPricePerKiloUSD: companyKiloPriceUSD,
             customerPricePerKilo: customerKiloPrice
           };
         }
         return o;
       }));
-      toast({ title: "تم إضافة تفاصيل الوزن بنجاح" });
+      toast({ title: "تم إضافة وزن للزبون بنجاح" });
       setIsWeightDialogOpen(false);
       setCurrentOrder(null);
     } catch (error) {
