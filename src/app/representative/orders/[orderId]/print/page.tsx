@@ -105,8 +105,8 @@ const PrintableContent = ({ labelData }: { labelData: Order }) => {
                 <div className="border-l border-gray-300 pl-4">
                     <h2 className="font-bold mb-2 whitespace-nowrap">من: المرسل</h2>
                     <p className="font-semibold">شركة فوترة</p>
-                    <p>طبرق , حي اشبيليا , مقابل الاستخبارات</p>
-                    <p dir="ltr" className="text-right font-mono">0946691233</p>
+                    <p>قرجي – بالقرب من مدرسة قرطبة</p>
+                    <p dir="ltr" className="text-right font-mono">0946891207</p>
                 </div>
                 <div>
                     <h2 className="font-bold mb-2 whitespace-nowrap">إلى: المستلم</h2>
