@@ -17,17 +17,17 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* Brand Colors (#0FABF4 -> HSL 199 92% 51%) */
-    --primary: 199 92% 51%;
+    /* Brand Colors (Primary: #112a49 -> 213 62% 18%, Secondary: #d3c28f -> 45 46% 69%) */
+    --primary: 213 62% 18%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 45 46% 69%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 199 92% 51%;
+    --accent: 45 46% 69%;
     /* Use Brand Blue as Accent */
     --accent-foreground: 222.2 47.4% 11.2%;
 
@@ -36,7 +36,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 199 92% 51%;
+    --ring: 213 62% 18%;
 
     --radius: 1rem;
 
@@ -56,8 +56,8 @@
     --popover: 224 71% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 199 92% 51%;
-    /* Brand #0FABF4 */
+    --primary: 213 62% 18%;
+    /* Brand #112a49 */
     --primary-foreground: 210 40% 98%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -66,7 +66,7 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 199 92% 51%;
+    --accent: 45 46% 69%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -74,7 +74,7 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 199 92% 51%;
+    --ring: 213 62% 18%;
 
     /* Custom Premium Variables Dark */
     --glass-border: 255 255 255 0.08;
@@ -92,7 +92,12 @@
   }
 
   .glass-premium {
-    @apply bg-gradient-to-br from-white/80 to-slate-50/50 dark:from-slate-900/90 dark:to-slate-900/50 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] dark:shadow-[0_8px_32px_0_#1f26875e];
+    @apply bg-gradient-to-br from-white/80 to-slate-50/50 dark:from-slate-900/90 dark:to-slate-900/50 backdrop-blur-2xl border border-white/20 dark:border-white/10;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  }
+
+  .dark .glass-premium {
+    box-shadow: 0 8px 32px 0 #1f26875e;
   }
 
   .text-gradient {

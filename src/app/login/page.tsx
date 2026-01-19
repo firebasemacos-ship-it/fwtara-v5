@@ -23,7 +23,7 @@ const Logo = ({ onClick }: { onClick: () => void }) => (
             src={logo}
             alt="Logo"
             fill
-            className="object-contain drop-shadow-2xl"
+            className="object-contain drop-shadow-2xl brightness-0"
             priority
         />
     </motion.div>
@@ -128,9 +128,9 @@ export default function LoginPage() {
     return (
         <div className="flex min-h-screen bg-background text-foreground overflow-hidden">
             {/* Left Panel - Visuals & Branding (Desktop) */}
-            <div className="hidden lg:flex w-1/2 bg-sky-950 relative items-center justify-center overflow-hidden">
+            <div className="hidden lg:flex w-1/2 bg-primary relative items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?q=80&w=2940&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
-                <div className="absolute inset-0 bg-gradient-to-br from-sky-900/90 to-slate-900/90"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-slate-900/90"></div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -155,10 +155,10 @@ export default function LoginPage() {
                             alt="Logo"
                             width={200}
                             height={200}
-                            className="mx-auto mb-8 drop-shadow-2xl brightness-0 invert"
+                            className="mx-auto mb-8 drop-shadow-2xl"
                         />
                     </motion.div>
-                    <h1 className="text-4xl font-bold text-white mb-6">شركة تمويل</h1>
+                    <h1 className="text-4xl font-bold text-white mb-6">شركة فوترة</h1>
                     <p className="text-xl text-sky-100/80 leading-relaxed">
                         شريكك الموثوق في عالم الخدمات اللوجستية. نضمن وصول شحناتك بأمان وسرعة إلى وجهتها.
                     </p>
@@ -251,7 +251,7 @@ export default function LoginPage() {
 
                         <Button
                             type="submit"
-                            className="w-full h-12 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-600/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                            className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                             disabled={isLoading}
                         >
                             {isLoading ? (
@@ -299,9 +299,9 @@ export default function LoginPage() {
                         className="pt-12 text-center"
                     >
                         <p className="text-sm text-slate-400 mb-2">هل تواجه مشكلة؟</p>
-                        <a href="tel:0946691233" className="inline-flex items-center gap-2 text-sky-600 font-semibold hover:text-sky-700 transition-colors bg-sky-50 px-4 py-2 rounded-full">
+                        <a href="tel:0946891207" className="inline-flex items-center gap-2 text-primary font-semibold hover:text-primary/80 transition-colors bg-secondary/20 px-4 py-2 rounded-full">
                             <Phone className="w-4 h-4" />
-                            <span dir="ltr">0946 691 233</span>
+                            <span dir="ltr">0946 891 207</span>
                         </a>
                     </motion.footer>
                 </div>

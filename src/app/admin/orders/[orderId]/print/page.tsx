@@ -20,7 +20,7 @@ const PrintView = () => {
     const printRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if(orderId) {
+        if (orderId) {
             const fetchOrderData = async () => {
                 setIsLoading(true);
                 const data = await getOrderById(orderId);
@@ -30,7 +30,7 @@ const PrintView = () => {
             fetchOrderData();
         }
     }, [orderId]);
-    
+
 
     useEffect(() => {
         if (labelData && !isLoading) {
@@ -42,11 +42,11 @@ const PrintView = () => {
         return (
             <div className="flex justify-center items-center h-screen no-print">
                 <Loader2 className="w-12 h-12 animate-spin text-primary" />
-                 <p className="ml-4">جاري تجهيز البوليصة...</p>
+                <p className="ml-4">جاري تجهيز البوليصة...</p>
             </div>
         );
     }
-    
+
     if (!labelData) {
         return (
             <div className="flex justify-center items-center h-screen no-print">
@@ -54,17 +54,17 @@ const PrintView = () => {
             </div>
         );
     }
-    
+
     return (
         <div className="bg-gray-100 p-4 min-h-screen">
-             <div className="w-full max-w-4xl mx-auto flex justify-end mb-4 no-print">
+            <div className="w-full max-w-4xl mx-auto flex justify-end mb-4 no-print">
                 <Button onClick={() => window.print()}>
                     <Printer className="w-4 h-4 ml-2" />
                     طباعة
                 </Button>
             </div>
-             <div ref={printRef} className="mx-auto printable-content shipping-label-page">
-                 <PrintableContent labelData={labelData} />
+            <div ref={printRef} className="mx-auto printable-content shipping-label-page">
+                <PrintableContent labelData={labelData} />
             </div>
         </div>
     );
@@ -74,16 +74,16 @@ const PrintableContent = ({ labelData }: { labelData: Order }) => {
     const isPaymentOnReceipt = labelData.remainingAmount > 0;
     return (
         <div className="bg-white shadow-lg flex flex-col border border-gray-300 w-full h-full mx-auto">
-             {/* Header */}
+            {/* Header */}
             <header className="grid grid-cols-3 items-center p-4 border-b border-gray-300">
                 <div className="col-span-1 flex items-center gap-4">
                     <img src={logo.src} alt="Logo" style={{ width: '60px', height: '60px' }} />
                     <div>
                         <h1 className="text-lg font-bold whitespace-nowrap">بوليصة شحن</h1>
-                        <p className="text-xs text-gray-500">شركة تمويل</p>
+                        <p className="text-xs text-gray-500">شركة فوترة</p>
                     </div>
                 </div>
-                 <div className="col-span-1"></div>
+                <div className="col-span-1"></div>
                 <div className="col-span-1 text-left">
                     <p className="font-bold text-sm whitespace-nowrap">رقم الفاتورة: {labelData.invoiceNumber}</p>
                     <p className="text-xs text-gray-500">{format(new Date(labelData.operationDate), 'yyyy/MM/dd')}</p>
@@ -105,18 +105,18 @@ const PrintableContent = ({ labelData }: { labelData: Order }) => {
                     <p dir="ltr" className="text-right font-mono">{labelData.customerPhone}</p>
                 </div>
             </section>
-            
-             {/* Order Details */}
+
+            {/* Order Details */}
             <section className="p-4 flex-grow">
-                 <h2 className="font-bold mb-2 whitespace-nowrap">تفاصيل الشحنة</h2>
-                 <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                    <InfoRow icon={<Package className="w-4 h-4" />} label="وصف المحتوى:" value={labelData.itemDescription || 'غير محدد'}/>
-                    <InfoRow icon={<Hash className="w-4 h-4" />} label="كود التتبع:" value={labelData.trackingId || 'N/A'}/>
-                    <InfoRow icon={<CalendarIcon className="w-4 h-4" />} label="تاريخ الطلب:" value={format(new Date(labelData.operationDate), 'yyyy/MM/dd')}/>
+                <h2 className="font-bold mb-2 whitespace-nowrap">تفاصيل الشحنة</h2>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                    <InfoRow icon={<Package className="w-4 h-4" />} label="وصف المحتوى:" value={labelData.itemDescription || 'غير محدد'} />
+                    <InfoRow icon={<Hash className="w-4 h-4" />} label="كود التتبع:" value={labelData.trackingId || 'N/A'} />
+                    <InfoRow icon={<CalendarIcon className="w-4 h-4" />} label="تاريخ الطلب:" value={format(new Date(labelData.operationDate), 'yyyy/MM/dd')} />
                     <InfoRow icon={<DollarSign className="w-4 h-4" />} label="المبلغ الإجمالي:" value={`${labelData.sellingPriceLYD.toFixed(2)} د.ل`} />
-                 </div>
-                 <Separator className="my-4"/>
-                 <div className="bg-gray-100 p-3 rounded-md text-center">
+                </div>
+                <Separator className="my-4" />
+                <div className="bg-gray-100 p-3 rounded-md text-center">
                     <p className="font-bold text-base whitespace-nowrap">
                         {isPaymentOnReceipt ? "المبلغ المطلوب عند الاستلام" : "الدفعة تمت بالكامل"}
                     </p>
@@ -125,7 +125,7 @@ const PrintableContent = ({ labelData }: { labelData: Order }) => {
                             {labelData.remainingAmount.toFixed(2)} د.ل
                         </p>
                     )}
-                 </div>
+                </div>
             </section>
 
             {/* Footer */}

@@ -39,7 +39,7 @@ const PrintView = () => {
         };
         setLabelData(data);
     }, [searchParams]);
-    
+
     useEffect(() => {
         if (labelData) {
             // Automatically trigger print dialog when component is ready
@@ -54,17 +54,17 @@ const PrintView = () => {
             </div>
         );
     }
-    
+
     return (
         <div className="bg-gray-100 p-4 min-h-screen">
-             <div className="w-full max-w-4xl mx-auto flex justify-end mb-4 no-print">
+            <div className="w-full max-w-4xl mx-auto flex justify-end mb-4 no-print">
                 <Button onClick={() => window.print()}>
                     <Printer className="w-4 h-4 ml-2" />
                     طباعة
                 </Button>
             </div>
-             <div className="mx-auto printable-content">
-                 <PrintableContent labelData={labelData} />
+            <div className="mx-auto printable-content">
+                <PrintableContent labelData={labelData} />
             </div>
         </div>
     );
@@ -74,16 +74,16 @@ const PrintableContent = ({ labelData }: { labelData: LabelData }) => {
     const isPaymentOnReceipt = labelData.remainingAmount > 0;
     return (
         <div className="shipping-label-page bg-white shadow-lg flex flex-col border border-gray-300 w-[148mm] min-h-[205mm] mx-auto">
-             {/* Header */}
+            {/* Header */}
             <header className="grid grid-cols-3 items-center p-4 border-b border-gray-300">
                 <div className="col-span-1 flex items-center gap-4">
-                    <img src={logo.src} alt="Logo" style={{ width: '60px', height: '60px' }} />
+                    <img src={logo.src} alt="Logo" style={{ width: '60px', height: '60px', filter: 'brightness(0)' }} />
                     <div>
                         <h1 className="text-lg font-bold whitespace-nowrap">بوليصة شحن</h1>
-                        <p className="text-xs text-gray-500">شركة تمويل</p>
+                        <p className="text-xs text-gray-500">شركة فوترة</p>
                     </div>
                 </div>
-                 <div className="col-span-1"></div>
+                <div className="col-span-1"></div>
                 <div className="col-span-1 text-left">
                     <p className="font-bold text-sm whitespace-nowrap">رقم الفاتورة: {labelData.invoiceNumber}</p>
                     <p className="text-xs text-gray-500">{format(new Date(labelData.operationDate), 'yyyy/MM/dd')}</p>
@@ -94,9 +94,9 @@ const PrintableContent = ({ labelData }: { labelData: LabelData }) => {
             <section className="grid grid-cols-2 gap-4 p-4 border-b border-gray-300 text-sm">
                 <div className="border-l border-gray-300 pl-4">
                     <h2 className="font-bold mb-2 whitespace-nowrap">من: المرسل</h2>
-                    <p className="font-semibold">شركة تمويل</p>
-                    <p>طبرق , حي اشبيليا , مقابل الاستخبارات</p>
-                    <p dir="ltr" className="text-right font-mono">0946691233</p>
+                    <p className="font-semibold">شركة فوترة</p>
+                    <p>قرجي – بالقرب من مدرسة قرطبة</p>
+                    <p dir="ltr" className="text-right font-mono">0946891207</p>
                 </div>
                 <div>
                     <h2 className="font-bold mb-2 whitespace-nowrap">إلى: المستلم</h2>
@@ -105,18 +105,18 @@ const PrintableContent = ({ labelData }: { labelData: LabelData }) => {
                     <p dir="ltr" className="text-right font-mono">{labelData.customerPhone}</p>
                 </div>
             </section>
-            
-             {/* Order Details */}
+
+            {/* Order Details */}
             <section className="p-4 flex-grow">
-                 <h2 className="font-bold mb-2 whitespace-nowrap">تفاصيل الشحنة</h2>
-                 <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                    <InfoRow icon={<Package className="w-4 h-4" />} label="وصف المحتوى:" value={labelData.itemDescription || 'غير محدد'}/>
-                    <InfoRow icon={<Hash className="w-4 h-4" />} label="كود التتبع:" value={labelData.trackingId || 'N/A'}/>
-                    <InfoRow icon={<CalendarIcon className="w-4 h-4" />} label="تاريخ الطلب:" value={format(new Date(labelData.operationDate), 'yyyy/MM/dd')}/>
+                <h2 className="font-bold mb-2 whitespace-nowrap">تفاصيل الشحنة</h2>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                    <InfoRow icon={<Package className="w-4 h-4" />} label="وصف المحتوى:" value={labelData.itemDescription || 'غير محدد'} />
+                    <InfoRow icon={<Hash className="w-4 h-4" />} label="كود التتبع:" value={labelData.trackingId || 'N/A'} />
+                    <InfoRow icon={<CalendarIcon className="w-4 h-4" />} label="تاريخ الطلب:" value={format(new Date(labelData.operationDate), 'yyyy/MM/dd')} />
                     <InfoRow icon={<DollarSign className="w-4 h-4" />} label="المبلغ الإجمالي:" value={`${labelData.sellingPriceLYD.toFixed(2)} د.ل`} />
-                 </div>
-                 <Separator className="my-4"/>
-                 <div className="bg-gray-100 p-3 rounded-md text-center">
+                </div>
+                <Separator className="my-4" />
+                <div className="bg-gray-100 p-3 rounded-md text-center">
                     <p className="font-bold text-base whitespace-nowrap">
                         {isPaymentOnReceipt ? "المبلغ المطلوب عند الاستلام" : "الدفعة تمت بالكامل"}
                     </p>
@@ -125,7 +125,7 @@ const PrintableContent = ({ labelData }: { labelData: LabelData }) => {
                             {labelData.remainingAmount.toFixed(2)} د.ل
                         </p>
                     )}
-                 </div>
+                </div>
             </section>
 
             {/* Footer */}

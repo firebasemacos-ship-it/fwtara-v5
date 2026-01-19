@@ -20,7 +20,7 @@ const SupportChatPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-     const scrollToBottom = () => {
+    const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
@@ -31,7 +31,7 @@ const SupportChatPage = () => {
     useEffect(() => {
         const loadConversation = async () => {
             setIsLoading(true);
-            
+
             const loggedInUserStr = localStorage.getItem('loggedInUser');
             if (!loggedInUserStr) {
                 router.push('/login');
@@ -44,7 +44,7 @@ const SupportChatPage = () => {
                 router.push('/login');
                 return;
             }
-            
+
             const allUsers = await getUsers();
             const currentUser = allUsers.find(u => u.id === userId);
 
@@ -62,7 +62,7 @@ const SupportChatPage = () => {
                 const convosAfterCreation = await getConversations();
                 userConvo = convosAfterCreation.find(c => c.id === newConvoId);
             }
-            
+
             if (userConvo) {
                 setConversation(userConvo);
                 setMessages(userConvo.messages);
@@ -83,7 +83,7 @@ const SupportChatPage = () => {
             timestamp: new Date().toISOString()
         };
 
-        const optimisticMessage: Message = {...messageData, id: Date.now().toString()};
+        const optimisticMessage: Message = { ...messageData, id: Date.now().toString() };
         setMessages(prev => [...prev, optimisticMessage]);
         setNewMessage('');
 
@@ -94,10 +94,10 @@ const SupportChatPage = () => {
         <div className="min-h-screen bg-gradient-to-br from-secondary via-background to-secondary dark:from-slate-900 dark:via-black dark:to-slate-900 flex flex-col" dir="rtl">
             <header className="bg-card/30 backdrop-blur-lg border-b p-4 flex justify-between items-center shadow-sm sticky top-0 z-30">
                 <div className="flex items-center gap-4">
-                     <button onClick={() => router.back()} className="text-foreground">
+                    <button onClick={() => router.back()} className="text-foreground">
                         <ArrowLeft className="w-6 h-6" />
                     </button>
-                    <h1 className="text-xl font-bold">فريق دعم تمويل</h1>
+                    <h1 className="text-xl font-bold">فريق دعم فوترة</h1>
                 </div>
             </header>
 
@@ -107,26 +107,25 @@ const SupportChatPage = () => {
                         <Loader2 className="w-8 h-8 animate-spin text-primary" />
                     </div>
                 ) : messages.length === 0 ? (
-                     <div className="text-center text-muted-foreground pt-10">
+                    <div className="text-center text-muted-foreground pt-10">
                         <p>مرحباً بك! كيف يمكننا مساعدتك اليوم؟</p>
-                     </div>
+                    </div>
                 ) : (
                     messages.map(msg => (
                         <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-2xl shadow-md ${
-                                msg.sender === 'user' 
-                                    ? 'bg-primary text-primary-foreground rounded-br-none' 
+                            <div className={`max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-2xl shadow-md ${msg.sender === 'user'
+                                    ? 'bg-primary text-primary-foreground rounded-br-none'
                                     : 'bg-card text-card-foreground rounded-bl-none'
-                            }`}>
+                                }`}>
                                 <p className="text-sm">{msg.text}</p>
                                 <p className={`text-xs mt-1 ${msg.sender === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'} text-left`}>
-                                    {new Date(msg.timestamp).toLocaleTimeString('ar-LY', {hour: '2-digit', minute: '2-digit'})}
+                                    {new Date(msg.timestamp).toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' })}
                                 </p>
                             </div>
                         </div>
                     ))
                 )}
-                 <div ref={messagesEndRef} />
+                <div ref={messagesEndRef} />
             </main>
 
             <footer className="sticky bottom-0 bg-card/60 backdrop-blur-lg border-t p-2 z-20">
@@ -141,7 +140,7 @@ const SupportChatPage = () => {
                             <EmojiPicker onEmojiClick={(emojiObject) => setNewMessage(prev => prev + emojiObject.emoji)} />
                         </PopoverContent>
                     </Popover>
-                    <Input 
+                    <Input
                         placeholder="اكتب رسالتك..."
                         className="flex-grow h-11 bg-transparent"
                         value={newMessage}

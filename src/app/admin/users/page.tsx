@@ -125,7 +125,7 @@ const AdminUsersPage = () => {
 
   const generateNextUsername = () => {
     const maxUserNumber = users.reduce((max, user) => {
-      if (user.username.startsWith('MB')) {
+      if (user.username.startsWith('FW')) {
         const num = parseInt(user.username.substring(2));
         if (!isNaN(num) && num > max) {
           return num;
@@ -133,7 +133,7 @@ const AdminUsersPage = () => {
       }
       return max;
     }, 0);
-    return `MB${maxUserNumber + 1}`;
+    return `FW${maxUserNumber + 1}`;
   }
 
 
@@ -233,7 +233,7 @@ const AdminUsersPage = () => {
       dir="rtl"
     >
       <div className="flex items-center justify-between mb-6">
-        <motion.h1 variants={itemVariant} className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">إدارة المستخدمين</motion.h1>
+        <motion.h1 variants={itemVariant} className="text-2xl font-bold text-primary">إدارة المستخدمين</motion.h1>
         <motion.div variants={itemVariant} className="flex items-center gap-2">
           <Button size="sm" variant="outline" className="gap-1 bg-white/50 hover:bg-white/80" onClick={handleDownloadCSV} disabled={isLoading}>
             <Download className="h-4 w-4" />

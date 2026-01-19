@@ -94,7 +94,7 @@ const NOTIFICATIONS_COLLECTION = 'notifications_v4';
 const SETTINGS_COLLECTION = 'settings_v4';
 const EXPENSES_COLLECTION = 'expenses_v4';
 const DEPOSITS_COLLECTION = 'deposits_v4';
-const EXTERNAL_DEBTS_COLLECTION = 'externalDebts_v4';
+const EXTERNAL_DEBTS_COLLECTION = 'external_debts_v4';
 const CREDITORS_COLLECTION = 'creditors_v4';
 const MANUAL_LABELS_COLLECTION = 'manual_labels_v4';
 const INSTANT_SALES_COLLECTION = 'instant_sales_v4';
@@ -2101,5 +2101,17 @@ export async function bulkImport(collectionName: string, data: any[]): Promise<{
     } catch (e: any) {
         console.error("Bulk import exception:", e);
         return { success: false, count: 0, error: e.message };
+    }
+}
+
+
+// --- External Debts ---
+export async function getExternalDebts() {
+    try {
+        const querySnapshot = await getDocs(collection(db, EXTERNAL_DEBTS_COLLECTION));
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+        console.error('Error getting external debts:', error);
+        return [];
     }
 }

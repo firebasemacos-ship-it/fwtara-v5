@@ -3,34 +3,34 @@
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { DollarSign, CreditCard, MoreHorizontal, Edit, Trash2, TrendingUp, RefreshCcw, TrendingDown, Calendar as CalendarIcon, Loader2, Search, ArrowUpDown } from "lucide-react";
 import { Badge } from '@/components/ui/badge';
-import { Transaction, Order, AppSettings, Expense, OrderStatus } from '@/lib/types';
-import { getTransactions, deleteOrder, getOrders, getAppSettings, resetFinancialReports, getExpenses } from '@/lib/actions';
+import { Transaction, Order, AppSettings, Expense, OrderStatus, ExternalDebt } from '@/lib/types';
+import { getTransactions, deleteOrder, getOrders, getAppSettings, resetFinancialReports, getExpenses, getExternalDebts } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { DateRange } from "react-day-picker";
@@ -46,13 +46,13 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, L
 
 const statusConfig: { [key in OrderStatus]: { text: string; className: string } } = {
     pending: { text: 'قيد التجهيز', className: 'bg-yellow-100 text-yellow-700' },
-    processed: { text: 'تم التنفيذ', className: 'bg-cyan-100 text-cyan-700' },
-    ready: { text: 'تم التجهيز', className: 'bg-indigo-100 text-indigo-700' },
-    shipped: { text: 'تم الشحن', className: 'bg-blue-100 text-blue-700' },
-    arrived_dubai: { text: 'وصلت إلى دبي', className: 'bg-orange-100 text-orange-700' },
-    arrived_benghazi: { text: 'وصلت إلى بنغازي', className: 'bg-teal-100 text-teal-700' },
-    arrived_tobruk: { text: 'وصلت إلى طبرق', className: 'bg-purple-100 text-purple-700' },
-    out_for_delivery: { text: 'مع المندوب', className: 'bg-lime-100 text-lime-700' },
+    processed: { text: 'تم التنفيذ', className: 'bg-secondary/10 text-secondary-foreground' },
+    ready: { text: 'تم التجهيز', className: 'bg-secondary/20 text-secondary-foreground' },
+    shipped: { text: 'تم الشحن', className: 'bg-secondary/30 text-secondary-foreground' },
+    arrived_dubai: { text: 'وصلت إلى دبي', className: 'bg-primary/5 text-primary' },
+    arrived_benghazi: { text: 'وصلت إلى بنغازي', className: 'bg-primary/10 text-primary' },
+    arrived_tobruk: { text: 'وصلت إلى طبرق', className: 'bg-primary/20 text-primary' },
+    out_for_delivery: { text: 'مع المندوب', className: 'bg-secondary/40 text-secondary-foreground' },
     delivered: { text: 'تم التسليم', className: 'bg-green-100 text-green-700' },
     cancelled: { text: 'ملغي', className: 'bg-red-100 text-red-700' },
     paid: { text: 'مدفوع', className: 'bg-green-100 text-green-700' },
@@ -60,10 +60,10 @@ const statusConfig: { [key in OrderStatus]: { text: string; className: string } 
 
 type SortableKeys = 'customerName' | 'date' | 'status' | 'amount';
 type ChartDataPoint = {
-  date: string;
-  revenue: number;
-  expenses: number;
-  profit: number;
+    date: string;
+    revenue: number;
+    expenses: number;
+    profit: number;
 };
 
 
@@ -73,6 +73,7 @@ const FinancialReportsPage = () => {
     const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
     const [allOrders, setAllOrders] = useState<Order[]>([]);
     const [allExpenses, setAllExpenses] = useState<Expense[]>([]);
+    const [allExternalDebts, setAllExternalDebts] = useState<ExternalDebt[]>([]);
     const [settings, setSettings] = useState<AppSettings | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -87,17 +88,27 @@ const FinancialReportsPage = () => {
 
     const fetchData = async () => {
         setIsLoading(true);
-        const [fetchedTransactions, fetchedOrders, fetchedSettings, fetchedExpenses] = await Promise.all([
-            getTransactions(),
-            getOrders(),
-            getAppSettings(),
-            getExpenses(),
-        ]);
-        setAllTransactions(fetchedTransactions);
-        setAllOrders(fetchedOrders);
-        setSettings(fetchedSettings);
-        setAllExpenses(fetchedExpenses);
-        setIsLoading(false);
+        try {
+            const [fetchedTransactions, fetchedOrders, fetchedSettings, fetchedExpenses, fetchedExternalDebts] = await Promise.all([
+                getTransactions(),
+                getOrders(),
+                getAppSettings(),
+                getExpenses(),
+                getExternalDebts(),
+            ]);
+
+            setAllTransactions(fetchedTransactions);
+            setAllOrders(fetchedOrders);
+            setSettings(fetchedSettings);
+            setAllExpenses(fetchedExpenses);
+
+            setAllExternalDebts(fetchedExternalDebts as ExternalDebt[]);
+        } catch (error) {
+            console.error("Error fetching financial data:", error);
+            toast({ title: "خطأ", description: "فشل تحميل البيانات.", variant: "destructive" });
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     useEffect(() => {
@@ -110,7 +121,7 @@ const FinancialReportsPage = () => {
 
         let startDate: Date | null = null;
         let endDate: Date | null = null;
-        
+
         const now = new Date();
 
         switch (filterType) {
@@ -131,12 +142,12 @@ const FinancialReportsPage = () => {
                 endDate = endOfYear(now);
                 break;
             case 'custom':
-                if(dateRange?.from) startDate = startOfDay(dateRange.from);
-                if(dateRange?.to) endDate = endOfDay(dateRange.to);
-                else if(dateRange?.from) endDate = endOfDay(dateRange.from);
+                if (dateRange?.from) startDate = startOfDay(dateRange.from);
+                if (dateRange?.to) endDate = endOfDay(dateRange.to);
+                else if (dateRange?.from) endDate = endOfDay(dateRange.from);
                 break;
         }
-        
+
         let dateFilteredTransactions = regularTransactions;
         let dateFilteredExpenses = allExpenses;
         let dateFilteredOrders = regularOrders;
@@ -155,7 +166,7 @@ const FinancialReportsPage = () => {
                 return oDate >= startDate! && oDate <= endDate!;
             });
         }
-        
+
         let searchedTransactions = dateFilteredTransactions;
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
@@ -172,7 +183,7 @@ const FinancialReportsPage = () => {
                 );
             });
         }
-        
+
         let sortedTransactions = [...searchedTransactions];
         if (sortConfig !== null) {
             sortedTransactions.sort((a, b) => {
@@ -183,36 +194,35 @@ const FinancialReportsPage = () => {
                 return 0;
             });
         }
-        
+
         // --- Chart Data Processing ---
         const dataMap: { [key: string]: { revenue: number; expenses: number; profit: number } } = {};
         const isLongRange = (endDate?.getTime() ?? 0) - (startDate?.getTime() ?? 0) > 31 * 24 * 60 * 60 * 1000;
         const dateFormat = isLongRange ? 'yyyy-MM' : 'yyyy-MM-dd';
 
-        // Process payments for revenue
-        dateFilteredTransactions.filter(t => t.type === 'payment').forEach(t => {
-            const key = format(parseISO(t.date), dateFormat);
-            if (!dataMap[key]) dataMap[key] = { revenue: 0, expenses: 0, profit: 0 };
-            dataMap[key].revenue += t.amount;
-        });
-
         // Process expenses
+        let totalExpensesInPeriod = 0;
         dateFilteredExpenses.forEach(e => {
             const key = format(parseISO(e.date), dateFormat);
             if (!dataMap[key]) dataMap[key] = { revenue: 0, expenses: 0, profit: 0 };
             dataMap[key].expenses += e.amount;
+            totalExpensesInPeriod += e.amount;
         });
 
-        // Process orders for profit
-        dateFilteredOrders.filter(o => o.status !== 'cancelled').forEach(order => {
-             const key = format(parseISO(order.operationDate), dateFormat);
+        // Process ORDERS for REVENUE (Accrual Basis) - Only 'delivered' or 'paid'
+        // And calculate Profit = Revenue - Expenses
+        dateFilteredOrders.filter(o => o.status === 'delivered' || o.status === 'paid').forEach(order => {
+            const key = format(parseISO(order.operationDate), dateFormat);
             if (!dataMap[key]) dataMap[key] = { revenue: 0, expenses: 0, profit: 0 };
-            const purchasePriceUSD = order.purchasePriceUSD || 0;
-            const shippingCostLYD = order.shippingCostLYD || 0;
-            const exchangeRate = order.exchangeRate || settings?.exchangeRate || 1;
-            const purchaseCostLYD = purchasePriceUSD * exchangeRate;
-            const netProfitForOrder = order.sellingPriceLYD - purchaseCostLYD - shippingCostLYD;
-            dataMap[key].profit += netProfitForOrder;
+
+            // Revenue = Selling Price
+            const revenue = order.sellingPriceLYD || 0;
+            dataMap[key].revenue += revenue;
+        });
+
+        // Calculate Profit for each period in the map
+        Object.keys(dataMap).forEach(key => {
+            dataMap[key].profit = dataMap[key].revenue - dataMap[key].expenses;
         });
 
         const finalChartData = Object.keys(dataMap).map(key => ({
@@ -220,7 +230,7 @@ const FinancialReportsPage = () => {
             revenue: dataMap[key].revenue,
             expenses: dataMap[key].expenses,
             profit: dataMap[key].profit,
-        })).sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 
         return {
@@ -273,14 +283,14 @@ const FinancialReportsPage = () => {
         setIsDeleteDialogOpen(false);
         setTransactionToDelete(null);
     };
-    
+
     const handleResetReports = async () => {
         const success = await resetFinancialReports();
-        if(success) {
+        if (success) {
             toast({ title: "تم تصفير التقارير بنجاح" });
             fetchData();
         } else {
-             toast({ title: "خطأ", description: "فشل تصفير التقارير.", variant: "destructive" });
+            toast({ title: "خطأ", description: "فشل تصفير التقارير.", variant: "destructive" });
         }
         setIsResetDialogOpen(false);
     }
@@ -289,19 +299,21 @@ const FinancialReportsPage = () => {
         const revenue = chartData.reduce((sum, item) => sum + item.revenue, 0);
         const expenses = chartData.reduce((sum, item) => sum + item.expenses, 0);
         const profit = chartData.reduce((sum, item) => sum + item.profit, 0);
-        
-        // Correct way to calculate debt for the selected period
-        const debt = dateFilteredOrders
-            .filter(o => o.status !== 'cancelled')
-            .reduce((sum, order) => sum + order.remainingAmount, 0);
 
-        return { 
-            totalRevenue: revenue, 
-            totalDebt: debt, 
-            totalExpenses: expenses, 
-            netProfit: profit - expenses 
+        // Use Global Debt (Active Orders) instead of filtered
+        const orderDebt = allOrders
+            .filter(o => o.status !== 'cancelled')
+            .reduce((sum, order) => sum + (order.remainingAmount || 0), 0);
+
+        const externalDebtTotal = allExternalDebts.reduce((sum, d) => sum + (d.amount || 0), 0);
+
+        return {
+            totalRevenue: revenue,
+            totalDebt: orderDebt + externalDebtTotal,
+            totalExpenses: expenses,
+            netProfit: profit // Already calculated as Revenue - Expenses in chartData
         };
-    }, [chartData, dateFilteredOrders]);
+    }, [chartData, allOrders, allExternalDebts]);
 
 
     const summaryCards = [
@@ -310,7 +322,7 @@ const FinancialReportsPage = () => {
         { title: 'إجمالي المصروفات', value: `${totalExpenses.toFixed(2)} د.ل`, icon: <TrendingDown className="w-6 h-6" />, color: 'text-destructive' },
         { title: 'صافي الربح', value: `${netProfit.toFixed(2)} د.ل`, icon: <TrendingUp className="w-6 h-6" />, color: netProfit >= 0 ? 'text-primary' : 'text-destructive' },
     ];
-    
+
     const handleFilterChange = (type: string) => {
         setFilterType(type);
         const now = new Date();
@@ -320,7 +332,7 @@ const FinancialReportsPage = () => {
         else if (type === 'yearly') setDateRange({ from: startOfYear(now), to: endOfYear(now) });
         else if (type === 'all') setDateRange(undefined);
     }
-    
+
     const handleDateRangeSelect = (range: DateRange | undefined) => {
         setDateRange(range);
         setFilterType('custom');
@@ -328,15 +340,15 @@ const FinancialReportsPage = () => {
 
     const getFilterLabel = () => {
         switch (filterType) {
-            case 'daily': return `اليوم: ${format(new Date(), 'd MMMM yyyy', {locale: ar})}`;
+            case 'daily': return `اليوم: ${format(new Date(), 'd MMMM yyyy', { locale: ar })}`;
             case 'weekly': return 'هذا الأسبوع';
             case 'monthly': return 'هذا الشهر';
             case 'yearly': return 'هذه السنة';
-            case 'custom': 
+            case 'custom':
                 if (dateRange?.from && dateRange?.to) {
-                    return `${format(dateRange.from, 'd MMM', {locale: ar})} - ${format(dateRange.to, 'd MMM yyyy', {locale: ar})}`;
+                    return `${format(dateRange.from, 'd MMM', { locale: ar })} - ${format(dateRange.to, 'd MMM yyyy', { locale: ar })}`;
                 }
-                if(dateRange?.from) return `تاريخ: ${format(dateRange.from, 'd MMMM yyyy', {locale: ar})}`;
+                if (dateRange?.from) return `تاريخ: ${format(dateRange.from, 'd MMMM yyyy', { locale: ar })}`;
                 return 'فترة مخصصة';
             default: return 'عرض كل التقارير';
         }
@@ -394,7 +406,7 @@ const FinancialReportsPage = () => {
                                                 direction: 'rtl'
                                             }}
                                         />
-                                        <Legend wrapperStyle={{fontSize: "14px"}}/>
+                                        <Legend wrapperStyle={{ fontSize: "14px" }} />
                                         <Bar dataKey="revenue" fill="var(--color-green-600, #16a34a)" name="الإيرادات" radius={[4, 4, 0, 0]} />
                                         <Bar dataKey="expenses" fill="var(--color-destructive, #dc2626)" name="المصروفات" radius={[4, 4, 0, 0]} />
                                         <Bar dataKey="profit" fill="var(--color-primary, #3b82f6)" name="صافي الربح" radius={[4, 4, 0, 0]} />
@@ -408,19 +420,19 @@ const FinancialReportsPage = () => {
                 <Card>
                     <CardHeader>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                <div>
-                                    <CardTitle>سجل المعاملات</CardTitle>
-                                    <p className="text-sm text-muted-foreground pt-1">{getFilterLabel()}</p>
-                                </div>
-                                <div className="relative w-full sm:w-72">
-                                     <Input 
-                                        placeholder="ابحث بالهاتف، الاسم، الفاتورة..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pr-10"
-                                    />
-                                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                                </div>
+                            <div>
+                                <CardTitle>سجل المعاملات</CardTitle>
+                                <p className="text-sm text-muted-foreground pt-1">{getFilterLabel()}</p>
+                            </div>
+                            <div className="relative w-full sm:w-72">
+                                <Input
+                                    placeholder="ابحث بالهاتف، الاسم، الفاتورة..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pr-10"
+                                />
+                                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                            </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 pt-4">
                             <Button variant={filterType === 'all' ? 'default' : 'outline'} size="sm" onClick={() => handleFilterChange('all')}>الكل</Button>
@@ -430,37 +442,37 @@ const FinancialReportsPage = () => {
                             <Button variant={filterType === 'yearly' ? 'default' : 'outline'} size="sm" onClick={() => handleFilterChange('yearly')}>سنوي</Button>
                             <Popover>
                                 <PopoverTrigger asChild>
-                                <Button
-                                    id="date"
-                                    variant={"outline"}
-                                    size="sm"
-                                    className={cn("w-[240px] justify-start text-right font-normal", filterType === 'custom' && "border-primary")}
-                                >
-                                    <CalendarIcon className="ml-2 h-4 w-4" />
-                                    {dateRange?.from ? (
-                                    dateRange.to ? (
-                                        <>
-                                        {format(dateRange.from, "LLL dd, y")} -{" "}
-                                        {format(dateRange.to, "LLL dd, y")}
-                                        </>
-                                    ) : (
-                                        format(dateRange.from, "LLL dd, y")
-                                    )
-                                    ) : (
-                                    <span>اختر فترة</span>
-                                    )}
-                                </Button>
+                                    <Button
+                                        id="date"
+                                        variant={"outline"}
+                                        size="sm"
+                                        className={cn("w-[240px] justify-start text-right font-normal", filterType === 'custom' && "border-primary")}
+                                    >
+                                        <CalendarIcon className="ml-2 h-4 w-4" />
+                                        {dateRange?.from ? (
+                                            dateRange.to ? (
+                                                <>
+                                                    {format(dateRange.from, "LLL dd, y")} -{" "}
+                                                    {format(dateRange.to, "LLL dd, y")}
+                                                </>
+                                            ) : (
+                                                format(dateRange.from, "LLL dd, y")
+                                            )
+                                        ) : (
+                                            <span>اختر فترة</span>
+                                        )}
+                                    </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    initialFocus
-                                    mode="range"
-                                    defaultMonth={dateRange?.from}
-                                    selected={dateRange}
-                                    onSelect={handleDateRangeSelect}
-                                    numberOfMonths={2}
-                                    locale={ar}
-                                />
+                                    <Calendar
+                                        initialFocus
+                                        mode="range"
+                                        defaultMonth={dateRange?.from}
+                                        selected={dateRange}
+                                        onSelect={handleDateRangeSelect}
+                                        numberOfMonths={2}
+                                        locale={ar}
+                                    />
                                 </PopoverContent>
                             </Popover>
                         </div>
@@ -474,14 +486,14 @@ const FinancialReportsPage = () => {
                                         <div className='flex items-center'>العميل {getSortIndicator('customerName')}</div>
                                     </TableHead>
                                     <TableHead className='text-right whitespace-nowrap cursor-pointer' onClick={() => requestSort('date')}>
-                                         <div className='flex items-center'>التاريخ {getSortIndicator('date')}</div>
+                                        <div className='flex items-center'>التاريخ {getSortIndicator('date')}</div>
                                     </TableHead>
                                     <TableHead className='text-right whitespace-nowrap'>النوع</TableHead>
                                     <TableHead className='text-right whitespace-nowrap cursor-pointer' onClick={() => requestSort('status')}>
-                                         <div className='flex items-center'>الحالة {getSortIndicator('status')}</div>
+                                        <div className='flex items-center'>الحالة {getSortIndicator('status')}</div>
                                     </TableHead>
                                     <TableHead className='text-right whitespace-nowrap cursor-pointer' onClick={() => requestSort('amount')}>
-                                         <div className='flex items-center'>المبلغ {getSortIndicator('amount')}</div>
+                                        <div className='flex items-center'>المبلغ {getSortIndicator('amount')}</div>
                                     </TableHead>
                                     <TableHead className='text-right'>إجراءات</TableHead>
                                 </TableRow>
@@ -589,4 +601,3 @@ const FinancialReportsPage = () => {
 
 export default FinancialReportsPage;
 
-    

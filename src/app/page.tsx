@@ -127,14 +127,16 @@ const SplashScreen = () => {
         animate="visible"
       >
         <motion.div variants={itemVariants}>
-          <Image
-            src={logo}
-            alt="Logo"
-            width={120}
-            height={120}
-            className="mx-auto mb-8"
-            priority
-          />
+          <div className="bg-primary/95 backdrop-blur-sm p-0 rounded-[3rem] shadow-2xl mx-auto mb-8 border border-white/10 w-[300px] h-[300px] md:w-[500px] md:h-[500px] flex items-center justify-center">
+            <Image
+              src={logo}
+              alt="Logo"
+              width={380}
+              height={380}
+              className="drop-shadow-md w-[200px] h-[200px] md:w-[380px] md:h-[380px] object-contain"
+              priority
+            />
+          </div>
         </motion.div>
         <motion.h1
           variants={itemVariants}
@@ -148,7 +150,7 @@ const SplashScreen = () => {
       </motion.div>
 
       <footer className="absolute bottom-4 text-xs text-muted-foreground z-10">
-        جميع الحقوق محفوظة لشركة تمويل
+        جميع الحقوق محفوظة لشركة فوترة
       </footer>
     </div>
   );

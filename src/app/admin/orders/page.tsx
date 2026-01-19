@@ -52,12 +52,12 @@ import { Textarea } from '@/components/ui/textarea';
 
 const statusConfig: { [key in OrderStatus]: { text: string; icon: React.ReactNode; className: string } } = {
   pending: { text: 'قيد التجهيز', icon: <Clock className="w-4 h-4" />, className: 'bg-yellow-100 text-yellow-700' },
-  processed: { text: 'تم التنفيذ', icon: <CheckCircle className="w-4 h-4" />, className: 'bg-cyan-100 text-cyan-700' },
-  ready: { text: 'تم التجهيز', icon: <Package className="w-4 h-4" />, className: 'bg-indigo-100 text-indigo-700' },
-  shipped: { text: 'تم الشحن', icon: <Truck className="w-4 h-4" />, className: 'bg-blue-100 text-blue-700' },
-  arrived_dubai: { text: 'وصلت إلى دبي', icon: <Plane className="w-4 h-4" />, className: 'bg-orange-100 text-orange-700' },
-  arrived_benghazi: { text: 'وصلت إلى بنغازي', icon: <Building className="w-4 h-4" />, className: 'bg-teal-100 text-teal-700' },
-  arrived_tobruk: { text: 'وصلت إلى طبرق', icon: <Building className="w-4 h-4" />, className: 'bg-purple-100 text-purple-700' },
+  processed: { text: 'تم التنفيذ', icon: <CheckCircle className="w-4 h-4" />, className: 'bg-secondary/10 text-secondary-foreground' },
+  ready: { text: 'تم التجهيز', icon: <Package className="w-4 h-4" />, className: 'bg-secondary/20 text-secondary-foreground' },
+  shipped: { text: 'تم الشحن', icon: <Truck className="w-4 h-4" />, className: 'bg-secondary/30 text-secondary-foreground' },
+  arrived_dubai: { text: 'وصلت إلى دبي', icon: <Plane className="w-4 h-4" />, className: 'bg-primary/5 text-primary' },
+  arrived_benghazi: { text: 'وصلت إلى بنغازي', icon: <Building className="w-4 h-4" />, className: 'bg-primary/10 text-primary' },
+  arrived_tobruk: { text: 'وصلت إلى طبرق', icon: <Building className="w-4 h-4" />, className: 'bg-primary/20 text-primary font-bold' },
   out_for_delivery: { text: 'مع المندوب', icon: <MapPin className="w-4 h-4" />, className: 'bg-lime-100 text-lime-700' },
   delivered: { text: 'تم التسليم', icon: <CheckCircle className="w-4 h-4" />, className: 'bg-green-100 text-green-700' },
   cancelled: { text: 'ملغي', icon: <Trash2 className="w-4 h-4" />, className: 'bg-red-100 text-red-700' },
@@ -438,7 +438,7 @@ const AdminOrdersPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">كل الحالات</SelectItem>
-                  {allStatuses.map(s => <SelectItem key={s} value={s}>{statusConfig[s].text}</SelectItem>)}
+                  {allStatuses.map(s => <SelectItem key={s} value={s}>{statusConfig[s]?.text || s}</SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={paymentFilter} onValueChange={setPaymentFilter}>
@@ -504,7 +504,7 @@ const AdminOrdersPage = () => {
                       <DropdownMenuSubContent>
                         {allStatuses.map(s => (
                           <DropdownMenuItem key={s} onSelect={() => handleBulkUpdateStatus(s)}>
-                            {statusConfig[s].text}
+                            {statusConfig[s]?.text || s}
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuSubContent>
@@ -588,9 +588,9 @@ const AdminOrdersPage = () => {
                         {order.remainingAmount.toFixed(2)} د.ل
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={`font-normal border-none ${statusConfig[order.status as keyof typeof statusConfig].className}`}>
-                          {statusConfig[order.status as keyof typeof statusConfig].icon}
-                          <span className="mr-1">{statusConfig[order.status as keyof typeof statusConfig].text}</span>
+                        <Badge variant="outline" className={`font-normal border-none ${statusConfig[order.status as keyof typeof statusConfig]?.className || 'bg-gray-100 text-gray-700'}`}>
+                          {statusConfig[order.status as keyof typeof statusConfig]?.icon || <MoreHorizontal className="w-4 h-4" />}
+                          <span className="mr-1">{statusConfig[order.status as keyof typeof statusConfig]?.text || String(order.status)}</span>
                         </Badge>
                       </TableCell>
                       <TableCell>

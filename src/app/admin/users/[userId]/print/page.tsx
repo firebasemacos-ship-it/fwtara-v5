@@ -62,16 +62,16 @@ const PrintUserStatementPageContent = () => {
             return () => clearTimeout(timer);
         }
     }, [isLoading, user]);
-    
+
     if (isLoading) {
         return (
             <div className="flex h-screen items-center justify-center no-print">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                 <p className="ml-4">جاري تحميل البيانات...</p>
+                <p className="ml-4">جاري تحميل البيانات...</p>
             </div>
         );
     }
-    
+
     if (!user) {
         return <div className="p-8 text-center text-red-500 no-print">لم يتم العثور على المستخدم.</div>;
     }
@@ -79,32 +79,33 @@ const PrintUserStatementPageContent = () => {
     const totalOrdersValue = orders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + o.sellingPriceLYD, 0);
 
     const allFinancialEvents = [
-      ...transactions,
-      ...deposits.map(d => ({
-        id: d.id,
-        date: d.date,
-        description: `عربون: ${d.description || 'بدون وصف'}`,
-        amount: d.amount,
-        type: 'payment', // Treat deposit as a payment (credit)
-      }))
+        ...transactions,
+        ...deposits.map(d => ({
+            id: d.id,
+            date: d.date,
+            description: `عربون: ${d.description || 'بدون وصف'}`,
+            amount: d.amount,
+            type: 'payment', // Treat deposit as a payment (credit)
+        }))
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
         <div className="bg-gray-100 p-4 min-h-screen">
             <div className="w-full max-w-4xl mx-auto flex justify-between items-center mb-4 no-print">
-                 <h1 className="text-xl font-bold">معاينة طباعة كشف الحساب</h1>
+                <h1 className="text-xl font-bold">معاينة طباعة كشف الحساب</h1>
                 <Button onClick={() => window.print()}>
                     <Printer className="w-4 h-4 ml-2" />
                     طباعة
                 </Button>
             </div>
-             <div className="statement-page printable-content bg-white shadow-lg p-8 w-full max-w-4xl mx-auto">
+            <div className="statement-page printable-content bg-white shadow-lg p-8 w-full max-w-4xl mx-auto">
                 <header className="flex justify-between items-center mb-8 border-b-2 border-black pb-4">
                     <div className="flex items-center gap-4">
-                        <img src={logo.src} alt="Logo" style={{ width: '80px', height: '80px' }} />
+                        <img src={logo.src} alt="Logo" style={{ width: '80px', height: '80px', filter: 'brightness(0)' }} />
                         <div>
-                            <h1 className="text-2xl font-bold">شركة تمويل</h1>
+                            <h1 className="text-2xl font-bold">شركة فوترة</h1>
                             <p className="text-sm text-gray-500">للخدمات اللوجستية والتجارة العامة</p>
+                            <p className="text-xs text-gray-400 mt-1">قرجي – بالقرب من مدرسة قرطبة | هـ: 0946891207</p>
                         </div>
                     </div>
                     <div className="text-left">
@@ -116,10 +117,10 @@ const PrintUserStatementPageContent = () => {
                 <section className="mb-6 border border-gray-300 rounded-lg p-4">
                     <h3 className="text-lg font-bold mb-3">بيانات العميل</h3>
                     <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                        <InfoRow icon={<UserIcon className="w-4 h-4"/>} label="اسم العميل:" value={user.name} />
-                        <InfoRow icon={<UserIcon className="w-4 h-4"/>} label="اسم المستخدم:" value={`@${user.username}`} />
-                        <InfoRow icon={<Phone className="w-4 h-4"/>} label="رقم الهاتف:" value={user.phone} />
-                        <InfoRow icon={<Home className="w-4 h-4"/>} label="العنوان:" value={user.address || 'غير محدد'} />
+                        <InfoRow icon={<UserIcon className="w-4 h-4" />} label="اسم العميل:" value={user.name} />
+                        <InfoRow icon={<UserIcon className="w-4 h-4" />} label="اسم المستخدم:" value={`@${user.username}`} />
+                        <InfoRow icon={<Phone className="w-4 h-4" />} label="رقم الهاتف:" value={user.phone} />
+                        <InfoRow icon={<Home className="w-4 h-4" />} label="العنوان:" value={user.address || 'غير محدد'} />
                     </div>
                 </section>
 
@@ -128,11 +129,11 @@ const PrintUserStatementPageContent = () => {
                     <SummaryBox icon={<CreditCard />} title="الدين الكلي المستحق" value={`${user.debt.toFixed(2)} د.ل`} valueColor="text-red-600" />
                     <SummaryBox icon={<ListOrdered />} title="عدد الطلبات" value={user.orderCount.toString()} />
                 </section>
-                
+
                 {deposits.length > 0 && (
                     <section className="mb-6">
-                        <h3 className="text-lg font-bold mb-3 flex items-center gap-2"><HandCoins className="w-5 h-5"/> سجل العربون</h3>
-                         <Table>
+                        <h3 className="text-lg font-bold mb-3 flex items-center gap-2"><HandCoins className="w-5 h-5" /> سجل العربون</h3>
+                        <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-100">
                                     <TableHead>تاريخ العربون</TableHead>
@@ -155,7 +156,7 @@ const PrintUserStatementPageContent = () => {
 
 
                 <section className="mb-6">
-                    <h3 className="text-lg font-bold mb-3 flex items-center gap-2"><ShoppingCart className="w-5 h-5"/> سجل الطلبات</h3>
+                    <h3 className="text-lg font-bold mb-3 flex items-center gap-2"><ShoppingCart className="w-5 h-5" /> سجل الطلبات</h3>
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-gray-100">
@@ -186,8 +187,8 @@ const PrintUserStatementPageContent = () => {
                 </section>
 
                 <section>
-                     <h3 className="text-lg font-bold mb-3 flex items-center gap-2"><History className="w-5 h-5"/> السجل المالي المتكامل</h3>
-                     <Table>
+                    <h3 className="text-lg font-bold mb-3 flex items-center gap-2"><History className="w-5 h-5" /> السجل المالي المتكامل</h3>
+                    <Table>
                         <TableHeader>
                             <TableRow className="bg-gray-100">
                                 <TableHead>التاريخ</TableHead>
@@ -213,10 +214,10 @@ const PrintUserStatementPageContent = () => {
                     </Table>
                 </section>
 
-                 <footer className="text-center text-xs text-gray-400 mt-12 pt-4 border-t">
-                     هذا المستند تم إنشاؤه بواسطة نظام تمويل.
-                 </footer>
-             </div>
+                <footer className="text-center text-xs text-gray-400 mt-12 pt-4 border-t">
+                    هذا المستند تم إنشاؤه بواسطة نظام فوترة.
+                </footer>
+            </div>
         </div>
     );
 };

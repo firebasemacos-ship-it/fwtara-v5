@@ -78,7 +78,7 @@ export default function RepresentativeLayout({
     <div className="min-h-screen bg-background text-foreground pb-20" dir="rtl">
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-4 p-4 sm:px-6 bg-background/80 backdrop-blur-md border-b">
         <div className="flex items-center gap-2">
-          <h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">محفظة المندوبين</h1>
+          <h1 className="font-bold text-xl text-primary">محفظة المندوبين</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" title="تسجيل الخروج" onClick={handleLogout}>

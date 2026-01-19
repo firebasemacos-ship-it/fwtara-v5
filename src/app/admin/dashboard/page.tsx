@@ -34,80 +34,80 @@ const allDashboardItems = [
         description: "عرض وتحديث حالات الطلبات الجديدة.",
         icon: ShoppingCart,
         href: "/admin/orders",
-        color: "text-blue-400",
-        gradient: "from-blue-500/20 to-cyan-500/20"
+        color: "text-secondary",
+        gradient: "from-primary/10 to-primary/5"
     },
     {
         title: "إدارة المستخدمين",
         description: "إضافة، تعديل، وحذف حسابات المستخدمين.",
         icon: Users,
         href: "/admin/users",
-        color: "text-green-400",
-        gradient: "from-green-500/20 to-emerald-500/20"
+        color: "text-secondary",
+        gradient: "from-primary/10 to-primary/5"
     },
     {
         title: "إدارة المندوبين",
         description: "متابعة المندوبين وتعيين الطلبات.",
         icon: Bike,
         href: "/admin/representatives",
-        color: "text-orange-400",
-        gradient: "from-orange-500/20 to-amber-500/20"
+        color: "text-secondary",
+        gradient: "from-primary/10 to-primary/5"
     },
     {
         title: "إدارة المدراء",
         description: "التحكم في صلاحيات المدراء والمشرفين.",
         icon: Briefcase,
         href: "/admin/employees",
-        color: "text-purple-400",
-        gradient: "from-purple-500/20 to-pink-500/20"
+        color: "text-secondary",
+        gradient: "from-primary/10 to-primary/5"
     },
     {
         title: "المستخدمين المؤقتين",
         description: "إدارة الطلبات للمستخدمين غير المسجلين.",
         icon: Users2,
         href: "/admin/temporary-users",
-        color: "text-indigo-400",
-        gradient: "from-indigo-500/20 to-violet-500/20"
+        color: "text-secondary",
+        gradient: "from-primary/10 to-primary/5"
     },
     {
         title: "التقارير المالية",
         description: "عرض الإحصائيات والتقارير المالية.",
         icon: BarChart,
         href: "/admin/financial-reports",
-        color: "text-pink-400",
-        gradient: "from-pink-500/20 to-rose-500/20"
+        color: "text-secondary",
+        gradient: "from-primary/10 to-primary/5"
     },
     {
         title: "مركز الدعم",
         description: "التواصل مع المستخدمين وحل مشاكلهم.",
         icon: MessageSquare,
         href: "/admin/support-center",
-        color: "text-teal-400",
-        gradient: "from-teal-500/20 to-cyan-500/20"
+        color: "text-secondary",
+        gradient: "from-primary/10 to-primary/5"
     },
     {
         title: "إدارة الإشعارات",
         description: "إرسال إشعارات عامة أو خاصة للمستخدمين.",
         icon: Bell,
         href: "/admin/notifications",
-        color: "text-yellow-400",
-        gradient: "from-yellow-500/20 to-orange-500/20"
+        color: "text-secondary",
+        gradient: "from-primary/10 to-primary/5"
     },
     {
         title: "اسعار الصرف والشحن",
         description: "إدارة إعدادات النظام المالية.",
         icon: DollarSign,
         href: "/admin/exchange-rate",
-        color: "text-red-400",
-        gradient: "from-red-500/20 to-orange-500/20"
+        color: "text-secondary",
+        gradient: "from-primary/10 to-primary/5"
     },
     {
         title: "مبيعات فورية",
         description: "تسجيل المبيعات المباشرة وحساب الأرباح.",
         icon: Zap,
         href: "/admin/instant-sales",
-        color: "text-yellow-300",
-        gradient: "from-yellow-400/20 to-amber-600/20"
+        color: "text-secondary",
+        gradient: "from-primary/10 to-primary/5"
     }
 ];
 
@@ -244,7 +244,7 @@ const AdminDashboardPage = () => {
                             variants={itemVariant}
                             className="text-4xl font-black tracking-tight text-foreground mb-2"
                         >
-                            مرحباً، <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">{manager.name}</span> 👋
+                            مرحباً، <span className="text-primary">{manager.name}</span> 👋
                         </motion.h1>
                     ) : (
                         <div className="flex items-center gap-2">
@@ -351,9 +351,9 @@ const AdminDashboardPage = () => {
                                     <div className="w-full md:w-1/2 h-[300px]">
                                         <PremiumDonutChart
                                             data={[
-                                                { name: "صافي الأرباح", value: dailyData.netProfit > 0 ? dailyData.netProfit : 0, color: "#38bdf8" }, // Sky Blue
+                                                { name: "صافي الأرباح", value: dailyData.netProfit > 0 ? dailyData.netProfit : 0, color: "#d3c28f" }, // Gold (Secondary)
                                                 { name: "المصاريف", value: dailyData.expenses, color: "#ef4444" }, // Red
-                                                { name: "تكلفة المبيعات", value: dailyData.revenue - dailyData.netProfit - dailyData.expenses, color: "#a855f7" } // Purple (approx purchase cost)
+                                                { name: "تكلفة المبيعات", value: dailyData.revenue - dailyData.netProfit - dailyData.expenses, color: "#112a49" } // Navy (Primary)
                                             ].filter(d => d.value > 0)}
                                             innerRadius={80}
                                             outerRadius={120}
@@ -361,11 +361,11 @@ const AdminDashboardPage = () => {
                                     </div>
                                     <div className="flex flex-col gap-4 w-full md:w-auto p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-4 h-4 rounded-full bg-[#38bdf8] shadow-[0_0_10px_#38bdf8]" />
+                                            <div className="w-4 h-4 rounded-full bg-[#d3c28f] shadow-[0_0_10px_#d3c28f]" />
                                             <div>
                                                 <div>
                                                     <p className="text-muted-foreground text-sm">صافي الأرباح</p>
-                                                    <p className="text-xl font-bold text-foreground bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-500">
+                                                    <p className="text-xl font-bold text-secondary">
                                                         {(dailyData.netProfit > 0 ? dailyData.netProfit : 0).toLocaleString()} <span className="text-xs">د.ل</span>
                                                     </p>
                                                 </div>
@@ -376,19 +376,19 @@ const AdminDashboardPage = () => {
                                             <div>
                                                 <div>
                                                     <p className="text-muted-foreground text-sm">المصاريف التشغيلية</p>
-                                                    <p className="text-xl font-bold text-foreground bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-orange-500">
+                                                    <p className="text-xl font-bold text-red-500">
                                                         {dailyData.expenses.toLocaleString()} <span className="text-xs">د.ل</span>
                                                     </p>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <div className="w-4 h-4 rounded-full bg-[#a855f7] shadow-[0_0_10px_#a855f7]" />
+                                            <div className="w-4 h-4 rounded-full bg-[#112a49] shadow-[0_0_10px_#112a49]" />
                                             <div>
                                                 <div>
                                                     <p className="text-muted-foreground text-sm">تكلفة المبيعات</p>
                                                     {/* Approximate Cost logic for display: Revenue - Profit - Expenses */}
-                                                    <p className="text-xl font-bold text-foreground bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
+                                                    <p className="text-xl font-bold text-primary">
                                                         {(dailyData.revenue - dailyData.netProfit - dailyData.expenses).toLocaleString()} <span className="text-xs">د.ل</span>
                                                     </p>
                                                 </div>
@@ -404,7 +404,7 @@ const AdminDashboardPage = () => {
                 {/* Recent Orders / Side Panel */}
                 <motion.div variants={itemVariant} className="space-y-6">
                     <GlassCard className="relative overflow-hidden min-h-[300px]">
-                        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-primary to-purple-600" />
+                        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-primary to-secondary" />
                         <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                             <ShoppingCart className="w-5 h-5 text-primary" />
                             أحدث الطلبات
@@ -415,7 +415,7 @@ const AdminDashboardPage = () => {
                                     <Link key={order.id} href={`/admin/orders/${order.id}`}>
                                         <div className="flex justify-between items-center p-3 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-black/5 dark:hover:border-white/5 group">
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-2 h-2 rounded-full ${order.status === 'delivered' ? 'bg-green-500' : order.status === 'pending' ? 'bg-yellow-500' : 'bg-blue-500'} shadow-[0_0_8px_currentColor]`} />
+                                                <div className={`w-2 h-2 rounded-full ${order.status === 'delivered' ? 'bg-green-500' : order.status === 'pending' ? 'bg-yellow-500' : 'bg-primary'} shadow-[0_0_8px_currentColor]`} />
                                                 <div>
                                                     <p className="text-sm text-foreground font-bold group-hover:text-primary transition-colors">#{order.invoiceNumber}</p>
                                                     <p className="text-xs text-muted-foreground">{new Date(order.operationDate).toLocaleDateString('ar-EG')}</p>
@@ -425,7 +425,7 @@ const AdminDashboardPage = () => {
                                                 <p className="text-sm font-bold text-foreground">{order.sellingPriceLYD.toLocaleString()} <span className="text-[10px] font-normal text-muted-foreground">د.ل</span></p>
                                                 <span className={`text-[10px] px-2 py-0.5 rounded-full ${order.status === 'delivered' ? 'bg-green-500/10 text-green-400' :
                                                     order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-400' :
-                                                        'bg-blue-500/10 text-blue-400'
+                                                        'bg-primary/10 text-primary'
                                                     }`}>
                                                     {order.status === 'delivered' ? 'تم التوصيل' : order.status === 'pending' ? 'قيد الانتظار' : order.status}
                                                 </span>

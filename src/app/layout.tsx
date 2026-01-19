@@ -36,8 +36,8 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "تمويل",
-  description: "منظومة تمويل لإدارة الشحنات والعملاء",
+  title: "فوترة",
+  description: "منظومة فوترة لإدارة الشحنات والعملاء",
 };
 
 export default function RootLayout({

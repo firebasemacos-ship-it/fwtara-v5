@@ -224,7 +224,7 @@ export default function AdminLayout({
               <div className="relative w-10 h-10 flex items-center justify-center bg-gradient-to-br from-primary to-accent rounded-xl shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all duration-500">
                 <Image src={logo} alt="Logo" width={28} height={28} className="brightness-0 invert" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">تمويل</h1>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">فوترة</h1>
             </Link>
             <Button
               variant="ghost"
@@ -297,7 +297,7 @@ export default function AdminLayout({
                   <Menu className="h-6 w-6" />
                   <span className="sr-only">Open sidebar</span>
                 </Button>
-                <h1 className="font-bold text-lg text-gradient bg-clip-text bg-gradient-to-r from-primary to-purple-500">{currentPageTitle}</h1>
+                <h1 className="font-bold text-lg text-foreground">{currentPageTitle}</h1>
               </div>
 
               <div className="flex items-center gap-2">

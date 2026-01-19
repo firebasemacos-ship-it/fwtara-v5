@@ -46,39 +46,39 @@ const PrintCreditorStatementPage = () => {
             </div>
         );
     }
-    
+
     if (!creditor) {
         return <div className="p-8 text-center text-red-500 no-print">لم يتم العثور على الحساب.</div>;
     }
-    
+
     const currencySymbol = creditor.currency === 'USD' ? '$' : 'د.ل';
     let balance = 0;
-    
+
     return (
         <div className="bg-gray-100 p-4 min-h-screen">
             <div className="w-full max-w-4xl mx-auto flex justify-between items-center mb-4 no-print">
-                 <h1 className="text-xl font-bold">معاينة الطباعة</h1>
+                <h1 className="text-xl font-bold">معاينة الطباعة</h1>
                 <Button onClick={() => window.print()}>
                     <Printer className="w-4 h-4 ml-2" />
                     طباعة
                 </Button>
             </div>
-             <div className="printable-content statement-page bg-white shadow-lg p-8 w-full max-w-4xl mx-auto">
-                 <header className="text-center mb-8 border-b pb-4">
+            <div className="printable-content statement-page bg-white shadow-lg p-8 w-full max-w-4xl mx-auto">
+                <header className="text-center mb-8 border-b pb-4">
                     <h1 className="text-3xl font-bold">كشف حساب</h1>
                     <h2 className="text-2xl mt-2">{creditor.name}</h2>
-                     <p className="text-sm text-gray-500 mt-1">{creditor.type === 'company' ? 'شركة' : 'شخص'}</p>
+                    <p className="text-sm text-gray-500 mt-1">{creditor.type === 'company' ? 'شركة' : 'شخص'}</p>
                 </header>
-                
-                 <div className="mb-6 flex justify-between items-center">
+
+                <div className="mb-6 flex justify-between items-center">
                     <div>
                         <p className="text-sm"><span className="font-semibold">تاريخ الطباعة:</span> {format(new Date(), 'yyyy/MM/dd', { locale: ar })}</p>
                     </div>
                     <div className="text-left">
                         <p className="text-sm font-semibold">الرصيد النهائي:</p>
                         <p className={`text-xl font-bold ${creditor.totalDebt === 0 ? '' : (creditor.totalDebt > 0 ? 'text-red-600' : 'text-green-600')}`}>
-                           {Math.abs(creditor.totalDebt).toFixed(2)} {currencySymbol}
-                           <span className="text-xs"> {creditor.totalDebt > 0 ? '(عليه)' : '(له)'}</span>
+                            {Math.abs(creditor.totalDebt).toFixed(2)} {currencySymbol}
+                            <span className="text-xs"> {creditor.totalDebt > 0 ? '(عليه)' : '(له)'}</span>
                         </p>
                     </div>
                 </div>
@@ -94,7 +94,7 @@ const PrintCreditorStatementPage = () => {
                         </tr>
                     </thead>
                     <tbody>
-                         <tr>
+                        <tr>
                             <td className="border border-gray-300 p-2" colSpan={4}>رصيد سابق</td>
                             <td className="border border-gray-300 p-2 font-mono font-semibold">0.00</td>
                         </tr>
@@ -111,23 +111,23 @@ const PrintCreditorStatementPage = () => {
                                     <td className="border border-gray-300 p-2 font-mono text-green-600">
                                         {!isDebit ? `${Math.abs(debt.amount).toFixed(2)}` : ''}
                                     </td>
-                                     <td className={`border border-gray-300 p-2 font-mono font-semibold ${balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                    <td className={`border border-gray-300 p-2 font-mono font-semibold ${balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
                                         {Math.abs(balance).toFixed(2)}
-                                     </td>
+                                    </td>
                                 </tr>
                             );
                         })}
-                         {debts.length === 0 && (
+                        {debts.length === 0 && (
                             <tr>
                                 <td colSpan={5} className="text-center p-4 text-gray-500">لا توجد حركات مالية مسجلة.</td>
                             </tr>
                         )}
                     </tbody>
                 </table>
-                 <footer className="text-center text-xs text-gray-400 mt-8">
-                     هذا المستند تم إنشاؤه بواسطة نظام تمويل.
-                 </footer>
-             </div>
+                <footer className="text-center text-xs text-gray-400 mt-8">
+                    هذا المستند تم إنشاؤه بواسطة نظام فوترة.
+                </footer>
+            </div>
         </div>
     );
 };

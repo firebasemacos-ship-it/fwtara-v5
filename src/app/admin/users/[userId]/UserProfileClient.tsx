@@ -34,13 +34,13 @@ interface UserProfileClientProps {
 
 const statusConfig: { [key in OrderStatus]: { text: string; className: string } } = {
     pending: { text: 'قيد التجهيز', className: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' },
-    processed: { text: 'تم التنفيذ', className: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20' },
-    ready: { text: 'تم التجهيز', className: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' },
-    shipped: { text: 'تم الشحن', className: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
-    arrived_dubai: { text: 'وصلت دبي', className: 'bg-orange-500/10 text-orange-500 border-orange-500/20' },
-    arrived_benghazi: { text: 'وصلت بنغازي', className: 'bg-teal-500/10 text-teal-500 border-teal-500/20' },
-    arrived_tobruk: { text: 'وصلت طبرق', className: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
-    out_for_delivery: { text: 'مع المندوب', className: 'bg-lime-500/10 text-lime-500 border-lime-500/20' },
+    processed: { text: 'تم التنفيذ', className: 'bg-secondary/10 text-secondary-foreground border-secondary/20' },
+    ready: { text: 'تم التجهيز', className: 'bg-secondary/20 text-secondary-foreground border-secondary/30' },
+    shipped: { text: 'تم الشحن', className: 'bg-secondary/30 text-secondary-foreground border-secondary/40' },
+    arrived_dubai: { text: 'وصلت دبي', className: 'bg-primary/5 text-primary border-primary/10' },
+    arrived_benghazi: { text: 'وصلت بنغازي', className: 'bg-primary/10 text-primary border-primary/20' },
+    arrived_tobruk: { text: 'وصلت طبرق', className: 'bg-primary/20 text-primary border-primary/30' },
+    out_for_delivery: { text: 'مع المندوب', className: 'bg-secondary/40 text-secondary-foreground border-secondary/50' },
     delivered: { text: 'تم التسليم', className: 'bg-green-500/10 text-green-500 border-green-500/20' },
     cancelled: { text: 'ملغي', className: 'bg-red-500/10 text-red-500 border-red-500/20' },
     paid: { text: 'مدفوع', className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
@@ -92,7 +92,7 @@ export const UserProfileClient = ({
 
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
                         <div className="flex items-center gap-6">
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-purple-600 p-1 shadow-xl shadow-primary/20">
+                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary p-1 shadow-xl shadow-primary/20">
                                 <div className="w-full h-full rounded-full bg-black/5 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center border-2 border-white/20">
                                     <span className="text-4xl font-bold text-white">
                                         {user.name.charAt(0).toUpperCase()}
