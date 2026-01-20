@@ -56,15 +56,15 @@ const statusConfig: { [key in OrderStatus]: { text: string; icon: React.ReactNod
   ready: { text: 'تم التجهيز', icon: <Package className="w-4 h-4" />, className: 'bg-secondary/20 text-secondary-foreground' },
   shipped: { text: 'تم الشحن', icon: <Truck className="w-4 h-4" />, className: 'bg-secondary/30 text-secondary-foreground' },
   arrived_dubai: { text: 'وصلت إلى دبي', icon: <Plane className="w-4 h-4" />, className: 'bg-primary/5 text-primary' },
-  arrived_benghazi: { text: 'وصلت إلى بنغازي', icon: <Building className="w-4 h-4" />, className: 'bg-primary/10 text-primary' },
-  arrived_tobruk: { text: 'وصلت إلى طبرق', icon: <Building className="w-4 h-4" />, className: 'bg-primary/20 text-primary font-bold' },
+  arrived_benghazi: { text: 'مع المندوب', icon: <Building className="w-4 h-4" />, className: 'bg-primary/10 text-primary' },
+  arrived_tobruk: { text: 'وصلت إلى طرابلس', icon: <Building className="w-4 h-4" />, className: 'bg-primary/20 text-primary font-bold' },
   out_for_delivery: { text: 'مع المندوب', icon: <MapPin className="w-4 h-4" />, className: 'bg-lime-100 text-lime-700' },
   delivered: { text: 'تم التسليم', icon: <CheckCircle className="w-4 h-4" />, className: 'bg-green-100 text-green-700' },
   cancelled: { text: 'ملغي', icon: <Trash2 className="w-4 h-4" />, className: 'bg-red-100 text-red-700' },
   paid: { text: 'مدفوع', icon: <CheckCircle className="w-4 h-4" />, className: 'bg-green-100 text-green-700' },
 };
 
-const allStatuses = Object.keys(statusConfig) as OrderStatus[];
+const allStatuses = (Object.keys(statusConfig) as OrderStatus[]).filter(s => s !== 'out_for_delivery');
 
 import { motion, AnimatePresence } from 'framer-motion';
 
